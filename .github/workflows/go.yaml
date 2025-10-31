@@ -1,0 +1,26 @@
+name: Go Continuous Improvement
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  go-pipeline:
+    runs-on: ubuntu-latest
+    container:
+      image: golang
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+
+    steps:
+      - name: Install Task
+        uses: arduino/setup-task@v2
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run CI task from Taskfile
+        run: task ci
