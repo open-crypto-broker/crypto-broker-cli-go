@@ -64,7 +64,7 @@ tasks:
       TAG: '{{.TAG | default "latest"}}'
     dotenv: ['.env']
     cmds:
-      - docker buildx build -f ./Dockerfile -t client_app_go:{{.TAG}} .
+      - docker buildx build -f ./docker/Dockerfile -t client_app_go:{{.TAG}} .
 
   delete-binaries:
     desc: "Delete binary artifacts"
