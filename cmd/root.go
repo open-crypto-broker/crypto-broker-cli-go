@@ -7,6 +7,7 @@ import (
 func init() {
 	rootCmd.AddCommand(hashCmd)
 	rootCmd.AddCommand(signCmd)
+	rootCmd.AddCommand(healthCmd)
 }
 
 var rootCmd = &cobra.Command{

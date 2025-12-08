@@ -13,26 +13,25 @@ import (
 )
 
 func init() {
-	hashCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
-	hashCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
+	healthCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
 		fmt.Sprintf("Specify delay for loop in miliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 }
 
-var hashCmd = &cobra.Command{
-	Use:   "hash SLICE_OF_BYTES_TO_BE_HASHED",
-	Short: "Hash sends hashing request to crypto broker.",
-	Args:  cobra.ExactArgs(1),
+var healthCmd = &cobra.Command{
+	Use:   "health",
+	Short: "Health checks the broker server status.",
+	Args:  cobra.NoArgs,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return flags.ValidateFlagLoop(flags.Loop)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		logger := log.New(os.Stdout, "CLIENT: ", log.Ldate|log.Lmicroseconds)
 
-		hashCommand, err := command.NewHash(cmd.Context(), logger)
+		healthCommand, err := command.NewHealth(cmd.Context(), logger)
 		if err != nil {
 			return err
 		}
 
-		return hashCommand.Run(cmd.Context(), []byte(args[0]), flags.Profile, flags.Loop)
+		return healthCommand.Run(cmd.Context(), flags.Loop)
 	},
 }

@@ -10,42 +10,31 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
-// Hash represents command that repeatedly sends hash request to crypto broker and displays its response
-type Hash struct {
+// Health represents command that checks broker server health status
+type Health struct {
 	logger              *log.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 }
 
-// NewHash initializes hash command
-func NewHash(ctx context.Context, logger *log.Logger) (*Hash, error) {
+// NewHealth initializes health command
+func NewHealth(ctx context.Context, logger *log.Logger) (*Health, error) {
 	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Hash{logger: logger, cryptoBrokerLibrary: lib}, nil
+	return &Health{logger: logger, cryptoBrokerLibrary: lib}, nil
 }
 
 // Run executes command logic.
-func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, flagLoop int) error {
+func (command *Health) Run(ctx context.Context, flagLoop int) error {
 	defer command.gracefulShutdown()
 
-	payload := cryptobrokerclientgo.HashDataPayload{
-		Input:   input,
-		Profile: flagProfile,
-		Metadata: &cryptobrokerclientgo.Metadata{
-			Id:        uuid.New().String(),
-			CreatedAt: time.Now().UTC().Format(time.RFC3339),
-		},
-	}
-
-	command.logger.Printf("Hashing \"%s\" using %s profile \n", string(input), flagProfile)
+	command.logger.Printf("Checking broker server health\n")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -62,7 +51,7 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 				command.logger.Printf("Received SIGTERM signal\n")
 				return nil
 			default:
-				if err := command.hashBytes(ctx, payload); err != nil {
+				if err := command.checkHealth(ctx); err != nil {
 					return err
 				}
 
@@ -70,38 +59,38 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 			}
 		}
 	} else {
-		if err := command.hashBytes(ctx, payload); err != nil {
+		if err := command.checkHealth(ctx); err != nil {
 			return err
 		}
 		return nil
 	}
 }
 
-// hashBytes sends hash request through crypto broker library.
+// checkHealth sends health check request through crypto broker library.
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
-func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
-	timestampHashingStart := time.Now()
-	responseBody, err := command.cryptoBrokerLibrary.HashData(ctx, payload)
+func (command *Health) checkHealth(ctx context.Context) error {
+	timestampStart := time.Now()
+	responseBody, err := command.cryptoBrokerLibrary.HealthData(ctx)
 	if err != nil {
 		return err
 	}
 
-	timestampHashingFinish := time.Now()
-	durationElapsedHashing := timestampHashingFinish.Sub(timestampHashingStart)
+	timestampFinish := time.Now()
+	durationElapsed := timestampFinish.Sub(timestampStart)
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
 	if err != nil {
 		return err
 	}
 
-	command.logger.Println("Hashed response:\n", string(marshalledResp))
-	command.logger.Printf("Data Hashing took: %fµs\n", float64(durationElapsedHashing.Nanoseconds())/1000.0)
+	command.logger.Println("Health check response:\n", string(marshalledResp))
+	command.logger.Printf("Health check took: %fµs\n", float64(durationElapsed.Nanoseconds())/1000.0)
 
 	return nil
 }
 
 // gracefulShutdown closes library connection.
-func (command *Hash) gracefulShutdown() error {
+func (command *Health) gracefulShutdown() error {
 	command.logger.Printf("Closing crypto broker library connection\n")
 	return command.cryptoBrokerLibrary.Close()
 }

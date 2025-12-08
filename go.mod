@@ -1,4 +1,4 @@
-module github.com/open-crypto-broker/crypto-broker-CLI-go
+module github.com/open-crypto-broker/crypto-broker-cli-go
 
 go 1.25.0
 
