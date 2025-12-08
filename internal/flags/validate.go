@@ -3,7 +3,7 @@ package flags
 import (
 	"fmt"
 
-	"github.com/open-crypto-broker/crypto-broker-CLI-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 )
 
 // ValidateFlagLoop validates loop flag value.

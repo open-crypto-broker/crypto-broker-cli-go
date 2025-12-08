@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/open-crypto-broker/crypto-broker-CLI-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 

@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/open-crypto-broker/crypto-broker-CLI-go/internal/command"
-	"github.com/open-crypto-broker/crypto-broker-CLI-go/internal/constant"
-	"github.com/open-crypto-broker/crypto-broker-CLI-go/internal/flags"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/command"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/flags"
 
 	"github.com/spf13/cobra"
 )
