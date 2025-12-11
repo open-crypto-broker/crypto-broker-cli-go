@@ -71,11 +71,7 @@ func (command *Health) Run(ctx context.Context, flagLoop int) error {
 // Internally method measures execution time and prints it through logger.
 func (command *Health) checkHealth(ctx context.Context) error {
 	timestampStart := time.Now()
-	responseBody, err := command.cryptoBrokerLibrary.HealthData(ctx)
-	if err != nil {
-		return err
-	}
-
+	responseBody := command.cryptoBrokerLibrary.HealthData(ctx)
 	timestampFinish := time.Now()
 	durationElapsed := timestampFinish.Sub(timestampStart)
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
