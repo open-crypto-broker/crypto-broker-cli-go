@@ -15,24 +15,28 @@ import (
 func init() {
 	hashCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
 	hashCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
-		fmt.Sprintf("Specify delay for loop in miliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
+		fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 }
 
 var hashCmd = &cobra.Command{
 	Use:   "hash SLICE_OF_BYTES_TO_BE_HASHED",
 	Short: "Hash sends hashing request to crypto broker.",
 	Args:  cobra.ExactArgs(1),
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return flags.ValidateFlagLoop(flags.Loop)
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if err := flags.ValidateFlagLoop(flags.Loop); err != nil {
+			log.Fatalf("Invalid loop flag value: %v", err)
+		}
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.New(os.Stdout, "CLIENT: ", log.Ldate|log.Lmicroseconds)
 
 		hashCommand, err := command.NewHash(cmd.Context(), logger)
 		if err != nil {
-			return err
+			log.Fatalf("Failed to initialize hash command: %v", err)
 		}
 
-		return hashCommand.Run(cmd.Context(), []byte(args[0]), flags.Profile, flags.Loop)
+		if err := hashCommand.Run(cmd.Context(), []byte(args[0]), flags.Profile, flags.Loop); err != nil {
+			log.Fatalf("Failed to run hash command: %v", err)
+		}
 	},
 }
