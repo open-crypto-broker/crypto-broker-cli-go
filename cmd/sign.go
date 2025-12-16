@@ -15,7 +15,7 @@ import (
 func init() {
 	signCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
 	signCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
-		fmt.Sprintf("Specify delay for loop in miliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
+		fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 	signCmd.Flags().StringVarP(&flags.Encoding, constant.KeywordFlagEncoding, "", constant.EncodingPEM,
 		fmt.Sprintf("Specify encoding to be used (%s, %s)", constant.EncodingPEM, constant.EncodingB64))
 	signCmd.Flags().StringVarP(&flags.Subject, constant.KeywordFlagSubject, "", "", "Specify custom subject to be used for certificate generation")
@@ -32,21 +32,25 @@ func init() {
 var signCmd = &cobra.Command{
 	Use:   "sign",
 	Short: "Sign sends certificate signing request to crypto broker.",
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	PreRun: func(cmd *cobra.Command, args []string) {
 		if err := flags.ValidateFlagEncoding(flags.Encoding); err != nil {
-			return err
+			log.Fatalf("Invalid encoding flag value: %v", err)
 		}
 
-		return flags.ValidateFlagLoop(flags.Loop)
+		if err := flags.ValidateFlagLoop(flags.Loop); err != nil {
+			log.Fatalf("Invalid loop flag value: %v", err)
+		}
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.New(os.Stdout, "CLIENT: ", log.Ldate|log.Lmicroseconds)
 		signCommand, err := command.NewSign(cmd.Context(), logger)
 		if err != nil {
-			return err
+			log.Fatalf("Failed to initialize sign command: %v", err)
 		}
 
-		return signCommand.Run(cmd.Context(),
-			flags.FilePathCSR, flags.FilePathCACert, flags.FilePathSigningKey, flags.Profile, flags.Encoding, flags.Subject, flags.Loop)
+		if err := signCommand.Run(cmd.Context(),
+			flags.FilePathCSR, flags.FilePathCACert, flags.FilePathSigningKey, flags.Profile, flags.Encoding, flags.Subject, flags.Loop); err != nil {
+			log.Fatalf("Failed to run sign command: %v", err)
+		}
 	},
 }
