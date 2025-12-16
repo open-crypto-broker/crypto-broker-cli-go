@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20251211085158-cf50629ee78e
+	github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20251216111220-165c03b9b41c
 	github.com/spf13/cobra v1.10.1
 )
 
