@@ -78,6 +78,12 @@ tasks:
     cmds:
       - ./bin/go-client-cli hash "Hello" --profile=Default
 
+  test-health:
+    deps: [build]
+    desc: "Test health check command"
+    cmds:
+      - ./bin/go-client-cli health
+
   test-sign:
     deps: [build]
     desc: "Test certificate signing command with Default profile"
