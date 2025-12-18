@@ -84,6 +84,12 @@ tasks:
     cmds:
       - ./bin/go-client-cli health
 
+  test-benchmark:
+    deps: [build]
+    desc: "Test benchmark command"
+    cmds:
+      - ./bin/go-client-cli benchmark
+
   test-sign:
     deps: [build]
     desc: "Test certificate signing command with Default profile"
