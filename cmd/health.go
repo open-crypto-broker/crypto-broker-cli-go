@@ -43,12 +43,21 @@ var healthCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// Handle graceful shutdown
+		// Ensure tracer provider is shut down when command completes
+		defer func() {
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
+				slog.Error("Failed to shutdown tracer provider", slog.String("error", err.Error()))
+			}
+		}()
+
+		// Handle graceful shutdown on signals
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		go func() {
 			<-c
-			slog.Info("Shutting down tracer provider")
+			slog.Info("Received signal, shutting down tracer provider")
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
