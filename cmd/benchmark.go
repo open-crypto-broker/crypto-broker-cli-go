@@ -45,7 +45,7 @@ var benchmarkCmd = &cobra.Command{
 
 		// Ensure tracer provider is shut down when command completes
 		defer func() {
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
 				slog.Error("Failed to shutdown tracer provider", slog.String("error", err.Error()))
@@ -58,7 +58,7 @@ var benchmarkCmd = &cobra.Command{
 		go func() {
 			<-c
 			slog.Info("Received signal, shutting down tracer provider")
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
 				slog.Error("Failed to shutdown tracer provider", slog.String("error", err.Error()))
@@ -66,12 +66,12 @@ var benchmarkCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		benchmarkCommand, err := command.NewBenchmark(cmd.Context(), logger, tracerProvider)
+		benchmarkCommand, err := command.NewBenchmark(ctx, logger, tracerProvider)
 		if err != nil {
 			log.Fatalf("Failed to initialize benchmark command: %v", err)
 		}
 
-		if err := benchmarkCommand.Run(cmd.Context(), flags.Loop); err != nil {
+		if err := benchmarkCommand.Run(ctx, flags.Loop); err != nil {
 			log.Fatalf("Failed to run benchmark command: %v", err)
 		}
 	},

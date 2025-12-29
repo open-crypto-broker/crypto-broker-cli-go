@@ -60,7 +60,7 @@ var signCmd = &cobra.Command{
 
 		// Ensure tracer provider is shut down when command completes
 		defer func() {
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
 				slog.Error("Failed to shutdown tracer provider", slog.String("error", err.Error()))
@@ -73,7 +73,7 @@ var signCmd = &cobra.Command{
 		go func() {
 			<-c
 			slog.Info("Received signal, shutting down tracer provider")
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
 			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
 				slog.Error("Failed to shutdown tracer provider", slog.String("error", err.Error()))
@@ -81,12 +81,12 @@ var signCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		signCommand, err := command.NewSign(cmd.Context(), logger, tracerProvider)
+		signCommand, err := command.NewSign(ctx, logger, tracerProvider)
 		if err != nil {
 			log.Fatalf("Failed to initialize sign command: %v", err)
 		}
 
-		if err := signCommand.Run(cmd.Context(),
+		if err := signCommand.Run(ctx,
 			flags.FilePathCSR, flags.FilePathCACert, flags.FilePathSigningKey, flags.Profile, flags.Encoding, flags.Subject, flags.Loop); err != nil {
 			log.Fatalf("Failed to run sign command: %v", err)
 		}
