@@ -14,7 +14,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Sign struct {
@@ -101,6 +104,17 @@ func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, fileP
 }
 
 func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokerclientgo.SignCertificatePayload, flagEncoding string) error {
+	tracer := otel.GetGlobalTracer(otel.ServiceName)
+	ctx, span := tracer.Start(ctx, "CLI.Sign",
+		trace.WithAttributes(
+			otel.AttributeRpcMethod.String("Sign"),
+			otel.AttributeCryptoProfile.String(payload.Profile),
+			otel.AttributeCryptoCsrSize.Int(len(payload.CSR)),
+			otel.AttributeCryptoCaCertSize.Int(len(payload.CACert)),
+			otel.AttributeCryptoCaKeySize.Int(len(payload.CAPrivateKey)),
+		))
+	defer span.End()
+
 	timestampSignStart := time.Now()
 	encodingOpt := cryptobrokerclientgo.WithPEMEncoding()
 	if strings.ToLower(flagEncoding) == constant.EncodingB64 {
@@ -109,6 +123,8 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 
 	responseBody, err := command.cryptoBrokerLibrary.SignCertificate(ctx, payload, encodingOpt)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return fmt.Errorf("failed to obtain signed certificate through CryptoBroker library, err: %w", err)
 	}
 
@@ -116,8 +132,13 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 	durationElapsedSign := timestampSignFinish.Sub(timestampSignStart)
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+
+	span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.SignedCertificate)))
+	span.SetStatus(codes.Ok, "Certificate signing completed successfully")
 
 	command.logger.Printf("Sign Response:\n%s", string(marshalledResp))
 	command.logger.Printf("Certificate Signing took: %fµs\n", float64(durationElapsedSign.Nanoseconds())/1000.0)

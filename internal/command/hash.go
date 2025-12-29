@@ -13,7 +13,10 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Hash represents command that repeatedly sends hash request to crypto broker and displays its response
@@ -81,9 +84,20 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
+	tracer := otel.GetGlobalTracer(otel.ServiceName)
+	ctx, span := tracer.Start(ctx, "CLI.Hash",
+		trace.WithAttributes(
+			otel.AttributeRpcMethod.String("Hash"),
+			otel.AttributeCryptoProfile.String(payload.Profile),
+			otel.AttributeCryptoInputSize.Int(len(payload.Input)),
+		))
+	defer span.End()
+
 	timestampHashingStart := time.Now()
 	responseBody, err := command.cryptoBrokerLibrary.HashData(ctx, payload)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 
@@ -91,8 +105,16 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 	durationElapsedHashing := timestampHashingFinish.Sub(timestampHashingStart)
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+
+	span.SetAttributes(
+		otel.AttributeCryptoHashAlgorithm.String(responseBody.HashAlgorithm),
+		otel.AttributeCryptoHashOutputSize.Int(len(responseBody.HashValue)),
+	)
+	span.SetStatus(codes.Ok, "Hash operation completed successfully")
 
 	command.logger.Println("Hashed response:\n", string(marshalledResp))
 	command.logger.Printf("Data Hashing took: %fµs\n", float64(durationElapsedHashing.Nanoseconds())/1000.0)

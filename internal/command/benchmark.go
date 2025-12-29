@@ -11,7 +11,10 @@ import (
 	"time"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Benchmark represents command that runs server-side cryptographic benchmarks
@@ -70,9 +73,16 @@ func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Benchmark) runBenchmark(ctx context.Context) error {
+	tracer := otel.GetGlobalTracer(otel.ServiceName)
+	ctx, span := tracer.Start(ctx, "CLI.Benchmark",
+		trace.WithAttributes(otel.AttributeRpcMethod.String("Benchmark")))
+	defer span.End()
+
 	timestampStart := time.Now()
 	responseBody, err := command.cryptoBrokerLibrary.BenchmarkData(ctx, cryptobrokerclientgo.BenchmarkDataPayload{})
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 
@@ -80,8 +90,13 @@ func (command *Benchmark) runBenchmark(ctx context.Context) error {
 	durationElapsed := timestampFinish.Sub(timestampStart)
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+
+	span.SetAttributes(otel.AttributeCryptoBenchmarkResultsSize.Int(len(marshalledResp)))
+	span.SetStatus(codes.Ok, "Benchmark operation completed successfully")
 
 	command.logger.Println("Benchmark results:\n", string(marshalledResp))
 	command.logger.Printf("Benchmark execution took: %fµs\n", float64(durationElapsed.Nanoseconds())/1000.0)
