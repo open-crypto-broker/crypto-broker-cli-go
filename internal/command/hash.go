@@ -23,16 +23,21 @@ import (
 type Hash struct {
 	logger              *log.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
+	tracerProvider      *otel.TracerProvider
 }
 
 // NewHash initializes hash command
-func NewHash(ctx context.Context, logger *log.Logger) (*Hash, error) {
+func NewHash(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Hash, error) {
 	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Hash{logger: logger, cryptoBrokerLibrary: lib}, nil
+	return &Hash{
+		logger:              logger,
+		cryptoBrokerLibrary: lib,
+		tracerProvider:      tracerProvider,
+	}, nil
 }
 
 // Run executes command logic.
@@ -84,7 +89,7 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
-	tracer := otel.GetGlobalTracer(otel.ServiceName)
+	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	ctx, span := tracer.Start(ctx, "CLI.Hash",
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("Hash"),

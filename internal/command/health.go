@@ -21,16 +21,21 @@ import (
 type Health struct {
 	logger              *log.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
+	tracerProvider      *otel.TracerProvider
 }
 
 // NewHealth initializes health command
-func NewHealth(ctx context.Context, logger *log.Logger) (*Health, error) {
+func NewHealth(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Health, error) {
 	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Health{logger: logger, cryptoBrokerLibrary: lib}, nil
+	return &Health{
+		logger:              logger,
+		cryptoBrokerLibrary: lib,
+		tracerProvider:      tracerProvider,
+	}, nil
 }
 
 // Run executes command logic.
@@ -73,7 +78,7 @@ func (command *Health) Run(ctx context.Context, flagLoop int) error {
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Health) checkHealth(ctx context.Context) error {
-	tracer := otel.GetGlobalTracer(otel.ServiceName)
+	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	ctx, span := tracer.Start(ctx, "CLI.Health",
 		trace.WithAttributes(otel.AttributeRpcMethod.String("Health")))
 	defer span.End()

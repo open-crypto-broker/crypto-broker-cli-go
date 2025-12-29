@@ -21,16 +21,21 @@ import (
 type Benchmark struct {
 	logger              *log.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
+	tracerProvider      *otel.TracerProvider
 }
 
 // NewBenchmark initializes benchmark command
-func NewBenchmark(ctx context.Context, logger *log.Logger) (*Benchmark, error) {
+func NewBenchmark(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Benchmark, error) {
 	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Benchmark{logger: logger, cryptoBrokerLibrary: lib}, nil
+	return &Benchmark{
+		logger:              logger,
+		cryptoBrokerLibrary: lib,
+		tracerProvider:      tracerProvider,
+	}, nil
 }
 
 // Run executes command logic.
@@ -73,7 +78,7 @@ func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Benchmark) runBenchmark(ctx context.Context) error {
-	tracer := otel.GetGlobalTracer(otel.ServiceName)
+	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	ctx, span := tracer.Start(ctx, "CLI.Benchmark",
 		trace.WithAttributes(otel.AttributeRpcMethod.String("Benchmark")))
 	defer span.End()

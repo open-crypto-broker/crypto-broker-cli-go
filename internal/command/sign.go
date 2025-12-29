@@ -23,16 +23,21 @@ import (
 type Sign struct {
 	logger              *log.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
+	tracerProvider      *otel.TracerProvider
 }
 
 // InitSign initializes sign command. This may panic in case of failure.
-func NewSign(ctx context.Context, logger *log.Logger) (*Sign, error) {
+func NewSign(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Sign, error) {
 	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Sign{logger: logger, cryptoBrokerLibrary: lib}, nil
+	return &Sign{
+		logger:              logger,
+		cryptoBrokerLibrary: lib,
+		tracerProvider:      tracerProvider,
+	}, nil
 }
 
 // Run executes command logic.
@@ -104,7 +109,7 @@ func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, fileP
 }
 
 func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokerclientgo.SignCertificatePayload, flagEncoding string) error {
-	tracer := otel.GetGlobalTracer(otel.ServiceName)
+	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	ctx, span := tracer.Start(ctx, "CLI.Sign",
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("Sign"),
