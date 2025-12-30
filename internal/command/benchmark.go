@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
@@ -83,8 +84,23 @@ func (command *Benchmark) runBenchmark(ctx context.Context) error {
 		trace.WithAttributes(otel.AttributeRpcMethod.String("Benchmark")))
 	defer span.End()
 
+	// Inject trace context into payload metadata
+	spanContext := span.SpanContext()
+	payload := cryptobrokerclientgo.BenchmarkDataPayload{
+		Metadata: &cryptobrokerclientgo.Metadata{
+			Id:        uuid.New().String(),
+			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+			TraceContext: &cryptobrokerclientgo.TraceContext{
+				TraceId:    spanContext.TraceID().String(),
+				SpanId:     spanContext.SpanID().String(),
+				TraceFlags: spanContext.TraceFlags().String(),
+				TraceState: spanContext.TraceState().String(),
+			},
+		},
+	}
+
 	timestampStart := time.Now()
-	responseBody, err := command.cryptoBrokerLibrary.BenchmarkData(ctx, cryptobrokerclientgo.BenchmarkDataPayload{})
+	responseBody, err := command.cryptoBrokerLibrary.BenchmarkData(ctx, payload)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())

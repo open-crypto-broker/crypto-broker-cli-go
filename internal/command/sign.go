@@ -72,10 +72,7 @@ func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, fileP
 		CAPrivateKey: rawContentSigningKey,
 		CACert:       rawContentCACert,
 		Subject:      subject,
-		Metadata: &cryptobrokerclientgo.Metadata{
-			Id:        uuid.New().String(),
-			CreatedAt: time.Now().UTC().Format(time.RFC3339),
-		},
+		Metadata:     nil, // Will be set in signCertificate with trace context
 	}
 
 	c := make(chan os.Signal, 1)
@@ -119,6 +116,21 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 			otel.AttributeCryptoCaKeySize.Int(len(payload.CAPrivateKey)),
 		))
 	defer span.End()
+
+	// Inject trace context into payload metadata
+	spanContext := span.SpanContext()
+	if payload.Metadata == nil {
+		payload.Metadata = &cryptobrokerclientgo.Metadata{
+			Id:        uuid.New().String(),
+			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+		}
+	}
+	payload.Metadata.TraceContext = &cryptobrokerclientgo.TraceContext{
+		TraceId:    spanContext.TraceID().String(),
+		SpanId:     spanContext.SpanID().String(),
+		TraceFlags: spanContext.TraceFlags().String(),
+		TraceState: spanContext.TraceState().String(),
+	}
 
 	timestampSignStart := time.Now()
 	encodingOpt := cryptobrokerclientgo.WithPEMEncoding()

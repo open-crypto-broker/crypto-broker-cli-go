@@ -17,6 +17,8 @@ import (
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
+	// Import the protobuf types (will be available after regeneration)
+	// For now, we'll create the trace context manually
 )
 
 // Hash represents command that repeatedly sends hash request to crypto broker and displays its response
@@ -45,12 +47,9 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 	defer command.gracefulShutdown()
 
 	payload := cryptobrokerclientgo.HashDataPayload{
-		Input:   input,
-		Profile: flagProfile,
-		Metadata: &cryptobrokerclientgo.Metadata{
-			Id:        uuid.New().String(),
-			CreatedAt: time.Now().UTC().Format(time.RFC3339),
-		},
+		Input:    input,
+		Profile:  flagProfile,
+		Metadata: nil, // Will be set in hashBytes with trace context
 	}
 
 	command.logger.Printf("Hashing \"%s\" using %s profile \n", string(input), flagProfile)
@@ -97,6 +96,21 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 			otel.AttributeCryptoInputSize.Int(len(payload.Input)),
 		))
 	defer span.End()
+
+	// Inject trace context into payload metadata
+	spanContext := span.SpanContext()
+	if payload.Metadata == nil {
+		payload.Metadata = &cryptobrokerclientgo.Metadata{
+			Id:        uuid.New().String(),
+			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+		}
+	}
+	payload.Metadata.TraceContext = &cryptobrokerclientgo.TraceContext{
+		TraceId:    spanContext.TraceID().String(),
+		SpanId:     spanContext.SpanID().String(),
+		TraceFlags: spanContext.TraceFlags().String(),
+		TraceState: spanContext.TraceState().String(),
+	}
 
 	timestampHashingStart := time.Now()
 	responseBody, err := command.cryptoBrokerLibrary.HashData(ctx, payload)
