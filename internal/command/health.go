@@ -25,12 +25,7 @@ type Health struct {
 }
 
 // NewHealth initializes health command
-func NewHealth(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Health, error) {
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+func NewHealth(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Health, error) {
 	return &Health{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,

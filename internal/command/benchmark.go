@@ -26,12 +26,7 @@ type Benchmark struct {
 }
 
 // NewBenchmark initializes benchmark command
-func NewBenchmark(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Benchmark, error) {
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+func NewBenchmark(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Benchmark, error) {
 	return &Benchmark{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,

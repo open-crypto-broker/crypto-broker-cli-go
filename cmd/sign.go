@@ -4,17 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/command"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/flags"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
-
+	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 	"github.com/spf13/cobra"
 )
 
@@ -50,44 +47,37 @@ var signCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := log.New(os.Stdout, "CLIENT: ", log.Ldate|log.Lmicroseconds)
 
-		// Initialize tracing
 		ctx := cmd.Context()
 		tracerProvider, err := otel.NewTracerProvider(ctx, "crypto-broker-cli-go", "0.0.0")
 		if err != nil {
-			slog.Error("Failed to initialize tracer provider", slog.String("error", err.Error()))
-			os.Exit(1)
+			log.Fatalf("Failed to initialize tracer provider: %v", err)
 		}
 
-		// Ensure tracer provider is shut down when command completes
-		defer func() {
-			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		// Shutdown function that ensures proper cleanup
+		shutdownTracer := func() {
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
-				slog.Error("Failed to shutdown tracer provider", slog.String("error", err.Error()))
+				log.Printf("Warning: Failed to shutdown tracer provider: %v", err)
 			}
-		}()
+		}
+		defer shutdownTracer()
 
-		// Handle graceful shutdown on signals
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-		go func() {
-			<-c
-			slog.Info("Received signal, shutting down tracer provider")
-			shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-			defer cancel()
-			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
-				slog.Error("Failed to shutdown tracer provider", slog.String("error", err.Error()))
-			}
-			os.Exit(0)
-		}()
-
-		signCommand, err := command.NewSign(ctx, logger, tracerProvider)
+		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 		if err != nil {
+			shutdownTracer()
+			log.Fatalf("Failed to initialize library: %v", err)
+		}
+
+		signCommand, err := command.NewSign(ctx, lib, logger, tracerProvider)
+		if err != nil {
+			shutdownTracer()
 			log.Fatalf("Failed to initialize sign command: %v", err)
 		}
 
 		if err := signCommand.Run(ctx,
 			flags.FilePathCSR, flags.FilePathCACert, flags.FilePathSigningKey, flags.Profile, flags.Encoding, flags.Subject, flags.Loop); err != nil {
+			shutdownTracer()
 			log.Fatalf("Failed to run sign command: %v", err)
 		}
 	},

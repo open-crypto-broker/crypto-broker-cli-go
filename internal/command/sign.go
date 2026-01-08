@@ -27,12 +27,7 @@ type Sign struct {
 }
 
 // InitSign initializes sign command. This may panic in case of failure.
-func NewSign(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Sign, error) {
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+func NewSign(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Sign, error) {
 	return &Sign{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,

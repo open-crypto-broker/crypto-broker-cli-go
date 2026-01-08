@@ -29,12 +29,7 @@ type Hash struct {
 }
 
 // NewHash initializes hash command
-func NewHash(ctx context.Context, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Hash, error) {
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Hash, error) {
 	return &Hash{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
