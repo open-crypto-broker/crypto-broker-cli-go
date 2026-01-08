@@ -13,23 +13,28 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
+	// Import the protobuf types (will be available after regeneration)
+	// For now, we'll create the trace context manually
 )
 
 // Hash represents command that repeatedly sends hash request to crypto broker and displays its response
 type Hash struct {
 	logger              *log.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
+	tracerProvider      *otel.TracerProvider
 }
 
 // NewHash initializes hash command
-func NewHash(ctx context.Context, logger *log.Logger) (*Hash, error) {
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Hash{logger: logger, cryptoBrokerLibrary: lib}, nil
+func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Hash, error) {
+	return &Hash{
+		logger:              logger,
+		cryptoBrokerLibrary: lib,
+		tracerProvider:      tracerProvider,
+	}, nil
 }
 
 // Run executes command logic.
@@ -37,12 +42,9 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 	defer command.gracefulShutdown()
 
 	payload := cryptobrokerclientgo.HashDataPayload{
-		Input:   input,
-		Profile: flagProfile,
-		Metadata: &cryptobrokerclientgo.Metadata{
-			Id:        uuid.New().String(),
-			CreatedAt: time.Now().UTC().Format(time.RFC3339),
-		},
+		Input:    input,
+		Profile:  flagProfile,
+		Metadata: nil, // Will be set in hashBytes with trace context
 	}
 
 	command.logger.Printf("Hashing \"%s\" using %s profile \n", string(input), flagProfile)
@@ -81,9 +83,35 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
+	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	ctx, span := tracer.Start(ctx, "CLI.Hash",
+		trace.WithAttributes(
+			otel.AttributeRpcMethod.String("Hash"),
+			otel.AttributeCryptoProfile.String(payload.Profile),
+			otel.AttributeCryptoInputSize.Int(len(payload.Input)),
+		))
+	defer span.End()
+
+	// Inject trace context into payload metadata
+	spanContext := span.SpanContext()
+	if payload.Metadata == nil {
+		payload.Metadata = &cryptobrokerclientgo.Metadata{
+			Id:        uuid.New().String(),
+			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+		}
+	}
+	payload.Metadata.TraceContext = &cryptobrokerclientgo.TraceContext{
+		TraceId:    spanContext.TraceID().String(),
+		SpanId:     spanContext.SpanID().String(),
+		TraceFlags: spanContext.TraceFlags().String(),
+		TraceState: spanContext.TraceState().String(),
+	}
+
 	timestampHashingStart := time.Now()
 	responseBody, err := command.cryptoBrokerLibrary.HashData(ctx, payload)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 
@@ -91,8 +119,16 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 	durationElapsedHashing := timestampHashingFinish.Sub(timestampHashingStart)
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+
+	span.SetAttributes(
+		otel.AttributeCryptoHashAlgorithm.String(responseBody.HashAlgorithm),
+		otel.AttributeCryptoHashOutputSize.Int(len(responseBody.HashValue)),
+	)
+	span.SetStatus(codes.Ok, "Hash operation completed successfully")
 
 	command.logger.Println("Hashed response:\n", string(marshalledResp))
 	command.logger.Printf("Data Hashing took: %fµs\n", float64(durationElapsedHashing.Nanoseconds())/1000.0)

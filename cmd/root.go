@@ -13,7 +13,7 @@ func init() {
 
 var rootCmd = &cobra.Command{
 	Use:   "go-client-cli",
-	Short: "github.com/open-crypto-broker/crypto-broker-CLI-go for working with Crypto Broker",
+	Short: "CLI for working with Crypto Broker",
 }
 
 func Execute() {

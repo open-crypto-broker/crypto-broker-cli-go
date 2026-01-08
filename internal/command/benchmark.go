@@ -10,24 +10,28 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Benchmark represents command that runs server-side cryptographic benchmarks
 type Benchmark struct {
 	logger              *log.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
+	tracerProvider      *otel.TracerProvider
 }
 
 // NewBenchmark initializes benchmark command
-func NewBenchmark(ctx context.Context, logger *log.Logger) (*Benchmark, error) {
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Benchmark{logger: logger, cryptoBrokerLibrary: lib}, nil
+func NewBenchmark(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Benchmark, error) {
+	return &Benchmark{
+		logger:              logger,
+		cryptoBrokerLibrary: lib,
+		tracerProvider:      tracerProvider,
+	}, nil
 }
 
 // Run executes command logic.
@@ -70,9 +74,31 @@ func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Benchmark) runBenchmark(ctx context.Context) error {
+	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	ctx, span := tracer.Start(ctx, "CLI.Benchmark",
+		trace.WithAttributes(otel.AttributeRpcMethod.String("Benchmark")))
+	defer span.End()
+
+	// Inject trace context into payload metadata
+	spanContext := span.SpanContext()
+	payload := cryptobrokerclientgo.BenchmarkDataPayload{
+		Metadata: &cryptobrokerclientgo.Metadata{
+			Id:        uuid.New().String(),
+			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+			TraceContext: &cryptobrokerclientgo.TraceContext{
+				TraceId:    spanContext.TraceID().String(),
+				SpanId:     spanContext.SpanID().String(),
+				TraceFlags: spanContext.TraceFlags().String(),
+				TraceState: spanContext.TraceState().String(),
+			},
+		},
+	}
+
 	timestampStart := time.Now()
-	responseBody, err := command.cryptoBrokerLibrary.BenchmarkData(ctx, cryptobrokerclientgo.BenchmarkDataPayload{})
+	responseBody, err := command.cryptoBrokerLibrary.BenchmarkData(ctx, payload)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 
@@ -80,8 +106,13 @@ func (command *Benchmark) runBenchmark(ctx context.Context) error {
 	durationElapsed := timestampFinish.Sub(timestampStart)
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+
+	span.SetAttributes(otel.AttributeCryptoBenchmarkResultsSize.Int(len(marshalledResp)))
+	span.SetStatus(codes.Ok, "Benchmark operation completed successfully")
 
 	command.logger.Println("Benchmark results:\n", string(marshalledResp))
 	command.logger.Printf("Benchmark execution took: %fµs\n", float64(durationElapsed.Nanoseconds())/1000.0)
