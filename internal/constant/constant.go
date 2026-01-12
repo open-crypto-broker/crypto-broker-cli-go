@@ -23,3 +23,9 @@ const (
 	MaxLoopFlagValue = 1000
 	NoLoopFlagValue  = -1000001
 )
+
+// constants for health check retry logic.
+const (
+	MaxHealthRetryAttempts = 60
+	HealthRetryDelayMs     = 1000 // 1 second between retries
+)
