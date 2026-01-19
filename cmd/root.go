@@ -9,6 +9,7 @@ func init() {
 	rootCmd.AddCommand(signCmd)
 	rootCmd.AddCommand(healthCmd)
 	rootCmd.AddCommand(benchmarkCmd)
+	rootCmd.AddCommand(fakeEndpointCmd)
 }
 
 var rootCmd = &cobra.Command{
