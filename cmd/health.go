@@ -49,10 +49,27 @@ var healthCmd = &cobra.Command{
 		}
 		defer shutdownTracer()
 
-		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
-		if err != nil {
-			shutdownTracer()
-			log.Fatalf("Failed to initialize library: %v", err)
+		// Retry library initialization with shorter timeout per attempt
+		var lib *cryptobrokerclientgo.Library
+		for attempt := 1; attempt <= constant.MaxHealthRetryAttempts; attempt++ {
+			// Create context with short timeout for each attempt
+			initCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+			lib, err = cryptobrokerclientgo.NewLibrary(initCtx)
+			cancel()
+
+			if err == nil {
+				// Connection successful
+				break
+			}
+
+			// Connection failed
+			if attempt < constant.MaxHealthRetryAttempts {
+				fmt.Printf("Could not establish connection. Retrying... (%d/%d)\n", attempt, constant.MaxHealthRetryAttempts)
+				time.Sleep(time.Duration(constant.HealthRetryDelayMs) * time.Millisecond)
+			} else {
+				shutdownTracer()
+				log.Fatalf("Failed to establish connection after %d attempts: %v", constant.MaxHealthRetryAttempts, err)
+			}
 		}
 
 		healthCommand, err := command.NewHealth(ctx, lib, logger, tracerProvider)

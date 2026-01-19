@@ -72,16 +72,42 @@ func (command *Health) Run(ctx context.Context, flagLoop int) error {
 // checkHealth sends health check request through crypto broker library.
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
+// If connection fails (status UNKNOWN), it retries up to MaxHealthRetryAttempts times.
 func (command *Health) checkHealth(ctx context.Context) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	ctx, span := tracer.Start(ctx, "CLI.Health",
 		trace.WithAttributes(otel.AttributeRpcMethod.String("Health")))
 	defer span.End()
 
-	timestampStart := time.Now()
-	responseBody := command.cryptoBrokerLibrary.HealthData(ctx)
-	timestampFinish := time.Now()
-	durationElapsed := timestampFinish.Sub(timestampStart)
+	var responseBody *cryptobrokerclientgo.HealthDataResponse
+	var durationElapsed time.Duration
+
+	// Retry loop for connection failures
+	for attempt := 1; attempt <= constant.MaxHealthRetryAttempts; attempt++ {
+		timestampStart := time.Now()
+		responseBody = command.cryptoBrokerLibrary.HealthData(ctx)
+		timestampFinish := time.Now()
+		durationElapsed = timestampFinish.Sub(timestampStart)
+
+		// Check if connection was successful
+		if responseBody.Status != cryptobrokerclientgo.StatusUnknown {
+			// Connection successful, break retry loop
+			break
+		}
+
+		// Connection failed, log retry attempt
+		if attempt < constant.MaxHealthRetryAttempts {
+			fmt.Printf("Could not establish connection. Retrying... (%d/%d)\n", attempt, constant.MaxHealthRetryAttempts)
+			time.Sleep(time.Duration(constant.HealthRetryDelayMs) * time.Millisecond)
+		} else {
+			// All retry attempts exhausted
+			err := fmt.Errorf("failed to establish connection after %d attempts", constant.MaxHealthRetryAttempts)
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+	}
+
 	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
 	if err != nil {
 		span.RecordError(err)
