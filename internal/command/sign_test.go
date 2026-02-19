@@ -25,7 +25,7 @@ func BenchmarkSign_Synchronously(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate sign, err: %s", err.Error())
 	}
-	
+
 	payload := cryptobrokerclientgo.SignCertificatePayload{
 		Profile: "Default",
 		CSR: []byte(`-----BEGIN CERTIFICATE REQUEST-----

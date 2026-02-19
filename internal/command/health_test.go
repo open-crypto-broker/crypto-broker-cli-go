@@ -10,7 +10,7 @@ import (
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
-func BenchmarkHash_Synchronously(b *testing.B) {
+func BenchmarkHealth_Synchronously(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -21,52 +21,39 @@ func BenchmarkHash_Synchronously(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
-
-	hashCmd, err := NewHash(ctx, lib, logger, tracerProvider)
+	healthCmd, err := NewHealth(ctx, lib, logger, tracerProvider)
 	if err != nil {
-		b.Fatalf("could not instantiate hash, err: %s", err.Error())
+		b.Fatalf("could not instantiate health, err: %s", err.Error())
 	}
-
-	payload := cryptobrokerclientgo.HashDataPayload{
-		Profile: "Default",
-		Input:   []byte("Hello world"),
-	}
+	
 	for b.Loop() {
-		err := hashCmd.hashBytes(ctx, payload)
+		err := healthCmd.checkHealth(ctx)
 		if err != nil {
-			b.Fatalf("could not run hash, err: %s", err.Error())
+			b.Fatalf("could not run health, err: %s", err.Error())
 		}
 	}
 }
 
-func BenchmarkHash_Asynchronously(b *testing.B) {
+func BenchmarkHealth_Asynchronously(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-
 	b.RunParallel(func(p *testing.PB) {
 		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 		if err != nil {
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
-
-		hashCmd, err := NewHash(ctx, lib, logger, tracerProvider)
+		healthCmd, err := NewHealth(ctx, lib, logger, tracerProvider)
 		if err != nil {
-			b.Fatalf("could not instantiate hash, err: %s", err.Error())
+			b.Fatalf("could not instantiate health, err: %s", err.Error())
 		}
-
-		payload := cryptobrokerclientgo.HashDataPayload{
-			Profile: "Default",
-			Input:   []byte("Hello world"),
-		}
-
 		for p.Next() {
-			err := hashCmd.hashBytes(ctx, payload)
+			err := healthCmd.checkHealth(ctx)
 			if err != nil {
-				b.Fatalf("could not run hash, err: %s", err.Error())
+				b.Fatalf("could not run health, err: %s", err.Error())
 			}
 		}
 	})
