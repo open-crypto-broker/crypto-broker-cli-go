@@ -28,6 +28,7 @@ jobs:
       - name: Run benchmarks
         continue-on-error: true
         run: |
+          git config --global --add safe.directory /__w/crypto-broker-cli-go/crypto-broker-cli-go
           git clone -b main --single-branch https://github.com/open-crypto-broker/crypto-broker-server.git
           git submodule update --init
           cd crypto-broker-server
