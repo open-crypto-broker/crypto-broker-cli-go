@@ -25,5 +25,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Run benchmarks
+        continue-on-error: true
+        run: |
+          git clone -b main --single-branch https://github.com/open-crypto-broker/crypto-broker-server.git
+          git submodule update --init
+          cd crypto-broker-server
+          & go run cmd/server/server.go
+          cd ..
+          task run-benchmarks
+
       - name: Run CI task from Taskfile
         run: task ci

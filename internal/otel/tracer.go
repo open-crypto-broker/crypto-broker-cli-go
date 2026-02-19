@@ -3,7 +3,7 @@ package otel
 import (
 	"context"
 	"fmt"
-	"log/slog"
+	"log"
 	"os"
 	"slices"
 	"strconv"
@@ -33,7 +33,7 @@ func GetGlobalTracer(serviceName string) trace.Tracer {
 }
 
 // NewTracerProvider creates and initializes a new OpenTelemetry tracer provider
-func NewTracerProvider(ctx context.Context, serviceName, serviceVersion string) (*TracerProvider, error) {
+func NewTracerProvider(ctx context.Context, logger *log.Logger, serviceName, serviceVersion string) (*TracerProvider, error) {
 	if serviceName == "" {
 		ServiceName = os.Getenv(env.OTEL_SERVICE_NAME)
 		if ServiceName == "" {
@@ -67,7 +67,7 @@ func NewTracerProvider(ctx context.Context, serviceName, serviceVersion string) 
 			return nil, fmt.Errorf("%s is not set", env.OTEL_EXPORTER_OTLP_ENDPOINT)
 		}
 
-		batcherHTTP, err := getBatchersHTTP(ctx, otlpEndpoint)
+		batcherHTTP, err := getBatchersHTTP(ctx, logger, otlpEndpoint)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create HTTP OTLP exporter: %w", err)
 		}
@@ -80,7 +80,7 @@ func NewTracerProvider(ctx context.Context, serviceName, serviceVersion string) 
 			return nil, fmt.Errorf("%s is not set", env.OTEL_EXPORTER_OTLP_ENDPOINT)
 		}
 
-		batcherGRPC, err := getBatchersGRPC(ctx, otlpEndpoint)
+		batcherGRPC, err := getBatchersGRPC(ctx, logger, otlpEndpoint)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create gRPC OTLP exporter: %w", err)
 		}
@@ -89,7 +89,7 @@ func NewTracerProvider(ctx context.Context, serviceName, serviceVersion string) 
 	}
 
 	if slices.Contains(exporterNames, keyExporterConsole) {
-		batcherConsole, err := getBatchersConsole()
+		batcherConsole, err := getBatchersConsole(logger)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create console exporter: %w", err)
 		}
@@ -97,8 +97,8 @@ func NewTracerProvider(ctx context.Context, serviceName, serviceVersion string) 
 	}
 
 	if len(batchers) == 0 {
-		slog.Info("No valid exporters configured, using no-op tracer provider",
-			slog.String("requested_exporters", tracesExporter))
+		logger.Println("No valid exporters configured, using no-op tracer provider",
+			"requested_exporters", tracesExporter)
 		tp := sdktrace.NewTracerProvider()
 		otel.SetTracerProvider(tp)
 		return &TracerProvider{tp: tp}, nil
@@ -120,22 +120,22 @@ func NewTracerProvider(ctx context.Context, serviceName, serviceVersion string) 
 		samplerName = samplerAlwaysOn
 	}
 
-	sampler := defineSampler(samplerName)
+	sampler := defineSampler(logger, samplerName)
 	options := append(batchers, sdktrace.WithResource(res), sdktrace.WithSampler(sampler))
 	tp := sdktrace.NewTracerProvider(options...)
 	otel.SetTracerProvider(tp)
 
-	slog.Info("OpenTelemetry tracer provider initialized",
-		slog.String("service_name", serviceName),
-		slog.String("service_version", serviceVersion),
-		slog.String("exporters", tracesExporter),
-		slog.String("sampler", samplerName))
+	logger.Println("OpenTelemetry tracer provider initialized",
+		"service_name", serviceName,
+		"service_version", serviceVersion,
+		"exporters", tracesExporter,
+		"sampler", samplerName)
 
 	return &TracerProvider{tp: tp}, nil
 }
 
 // getBatchersHTTP creates a HTTP exporter
-func getBatchersHTTP(ctx context.Context, otlpEndpoint string) ([]sdktrace.TracerProviderOption, error) {
+func getBatchersHTTP(ctx context.Context, logger *log.Logger, otlpEndpoint string) ([]sdktrace.TracerProviderOption, error) {
 	// Parse the endpoint URL to extract host:port and path
 	// For Dynatrace: "https://trc17344.live.dynatrace.com/api/v2/otlp"
 	// Endpoint should only be "trc17344.live.dynatrace.com"
@@ -168,7 +168,7 @@ func getBatchersHTTP(ctx context.Context, otlpEndpoint string) ([]sdktrace.Trace
 	// Check for Dynatrace API token
 	if apiToken := os.Getenv(env.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION); apiToken != "" {
 		headers["Authorization"] = apiToken
-		slog.Info("Dynatrace API token configured for OTLP HTTP exporter")
+		logger.Println("Dynatrace API token configured for OTLP HTTP exporter")
 	}
 
 	opts := []otlptracehttp.Option{
@@ -192,13 +192,13 @@ func getBatchersHTTP(ctx context.Context, otlpEndpoint string) ([]sdktrace.Trace
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP OTLP exporter: %w", err)
 	}
-	slog.Info("HTTP OTLP exporter configured", slog.String("endpoint", endpointHost), slog.String("path", urlPath))
+	logger.Println("HTTP OTLP exporter configured", "endpoint", endpointHost, "path", urlPath)
 
 	return []sdktrace.TracerProviderOption{sdktrace.WithBatcher(otlpExporter)}, nil
 }
 
 // getBatchersGRPC creates a gRPC exporter
-func getBatchersGRPC(ctx context.Context, otlpEndpoint string) ([]sdktrace.TracerProviderOption, error) {
+func getBatchersGRPC(ctx context.Context, logger *log.Logger, otlpEndpoint string) ([]sdktrace.TracerProviderOption, error) {
 	otlpExporter, err := otlptracegrpc.New(ctx,
 		otlptracegrpc.WithEndpoint(otlpEndpoint),
 		otlptracegrpc.WithInsecure(),
@@ -206,24 +206,24 @@ func getBatchersGRPC(ctx context.Context, otlpEndpoint string) ([]sdktrace.Trace
 	if err != nil {
 		return nil, fmt.Errorf("failed to create gRPC OTLP exporter: %w", err)
 	}
-	slog.Info("gRPC OTLP exporter configured", slog.String("endpoint", otlpEndpoint))
+	logger.Println("gRPC OTLP exporter configured", "endpoint", otlpEndpoint)
 
 	return []sdktrace.TracerProviderOption{sdktrace.WithBatcher(otlpExporter)}, nil
 }
 
 // getBatchersConsole creates a console exporter
-func getBatchersConsole() ([]sdktrace.TracerProviderOption, error) {
+func getBatchersConsole(logger *log.Logger) ([]sdktrace.TracerProviderOption, error) {
 	consoleExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create console exporter: %w", err)
 	}
-	slog.Info("Console exporter configured")
+	logger.Println("Console exporter configured")
 
 	return []sdktrace.TracerProviderOption{sdktrace.WithBatcher(consoleExporter)}, nil
 }
 
 // defineSampler defines the sampler for the tracer provider
-func defineSampler(samplerName string) sdktrace.Sampler {
+func defineSampler(logger *log.Logger, samplerName string) sdktrace.Sampler {
 	sampler := sdktrace.AlwaysSample()
 
 	switch samplerName {
@@ -252,7 +252,7 @@ func defineSampler(samplerName string) sdktrace.Sampler {
 		}
 		sampler = sdktrace.ParentBased(sdktrace.TraceIDRatioBased(samplingRatio))
 	default:
-		slog.Warn("Unknown OTEL_TRACES_SAMPLER value, using always_on", slog.String("sampler", samplerName))
+		logger.Println("Unknown OTEL_TRACES_SAMPLER value, using always_on", "sampler", samplerName)
 		sampler = sdktrace.AlwaysSample()
 	}
 
