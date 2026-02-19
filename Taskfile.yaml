@@ -4,7 +4,7 @@ vars:
   PROTOBUF_VERSION: "32.1"
   OTEL_TRACES_EXPORTER: "console" # 'otlphttp', 'otlpgrpc', 'console', or comma-separated list like 'console,otlphttp', 'console,otlpgrpc'
   OTEL_EXPORTER_OTLP_ENDPOINT: "localhost:4317" # Valid URL (only used when OTLP exporter is enabled)
-  OTEL_TRACES_SAMPLER: "always_on" # always_on, always_off, traceidratio, parentbased_always_on, parentbased_always_off, parentbased_traceidratio.
+  OTEL_TRACES_SAMPLER: "always_off" # always_on, always_off, traceidratio, parentbased_always_on, parentbased_always_off, parentbased_traceidratio.
   OTEL_TRACES_SAMPLER_ARG: "0.1" # Sampling ratio (0.0-1.0) when using ratio-based samplers like traceidratio or parentbased_traceidratio.
   OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION: "Api-Token API_TOKEN_HERE" # Authorization header for OTLP exporter
   # GNU grep support depending on OS
