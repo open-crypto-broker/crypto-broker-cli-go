@@ -10,7 +10,7 @@ import (
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
-func BenchmarkHash_profile_Default_Synchronously(b *testing.B) {
+func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -39,7 +39,7 @@ func BenchmarkHash_profile_Default_Synchronously(b *testing.B) {
 	}
 }
 
-func BenchmarkHash_profile_Default_Asynchronously(b *testing.B) {
+func BenchmarkHash_profile_Default_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
