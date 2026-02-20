@@ -10,7 +10,7 @@ import (
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
-func BenchmarkSign_profile_Default_NIST_SECP521R1_RSA4096_Sequential(b *testing.B) {
+func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_RSA4096_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -91,7 +91,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	}
 }
 
-func BenchmarkSign_profile_Default_NIST_SECP521R1_RSA4096_Parallel(b *testing.B) {
+func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_RSA4096_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -176,7 +176,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	})
 }
 
-func BenchmarkSign_profile_Default_NIST_SECP521R1_NIST_SECP521R1_Sequential(b *testing.B) {
+func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -241,7 +241,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	}
 }
 
-func BenchmarkSign_profile_Default_NIST_SECP521R1_NIST_SECP521R1_Parallel(b *testing.B) {
+func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -310,7 +310,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	})
 }
 
-func BenchmarkSign_profile_Default_NIST_SECP256R1_NIST_SECP384R1_Sequential(b *testing.B) {
+func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -370,7 +370,7 @@ f/KE4vY=
 	}
 }
 
-func BenchmarkSign_profile_Default_NIST_SECP256R1_NIST_SECP384R1_Parallel(b *testing.B) {
+func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
