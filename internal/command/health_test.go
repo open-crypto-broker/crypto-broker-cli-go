@@ -25,7 +25,7 @@ func BenchmarkHealth_Synchronously(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate health, err: %s", err.Error())
 	}
-	
+
 	for b.Loop() {
 		err := healthCmd.checkHealth(ctx)
 		if err != nil {
