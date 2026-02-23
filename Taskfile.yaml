@@ -114,6 +114,15 @@ tasks:
           echo -e "Certificate signing failed"
         fi
 
+  # More about benchmarks:
+  # - https://pkg.go.dev/testing@go1.25.3#hdr-Benchmarks
+  # - https://go.googlesource.com/proposal/+/master/design/14313-benchmark-format.md
+  # - go help testflag
+  run-benchmarks:
+    desc: "Command runs benchmarks"
+    cmds:
+      - OTEL_TRACES_SAMPLER=always_off go test ./... -benchmem -run=^$ -bench ^Benchmark
+
   ################# Continuous Improvement Tasks ####################
   check-dependencies:
     desc: "Set the dependencies"
