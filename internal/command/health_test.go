@@ -10,7 +10,7 @@ import (
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
-func BenchmarkHealth_Synchronously(b *testing.B) {
+func BenchmarkHealth_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
@@ -34,7 +34,7 @@ func BenchmarkHealth_Synchronously(b *testing.B) {
 	}
 }
 
-func BenchmarkHealth_Asynchronously(b *testing.B) {
+func BenchmarkHealth_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
