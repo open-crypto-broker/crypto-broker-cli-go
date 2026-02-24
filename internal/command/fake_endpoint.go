@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,13 +21,13 @@ import (
 
 // FakeEndpoint represents command that repeatedly sends fake endpoint request to crypto broker and displays its response
 type FakeEndpoint struct {
-	logger              *log.Logger
+	logger              *slog.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 	tracerProvider      *otel.TracerProvider
 }
 
 // NewFakeEndpoint initializes fake endpoint command
-func NewFakeEndpoint(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*FakeEndpoint, error) {
+func NewFakeEndpoint(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*FakeEndpoint, error) {
 	return &FakeEndpoint{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
@@ -43,7 +43,7 @@ func (command *FakeEndpoint) Run(ctx context.Context, flagLoop int) error {
 		Metadata: nil,
 	}
 
-	command.logger.Printf("Calling fake endpoint \n")
+	command.logger.Info("Calling fake endpoint")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -57,7 +57,7 @@ func (command *FakeEndpoint) Run(ctx context.Context, flagLoop int) error {
 		for {
 			select {
 			case <-c:
-				command.logger.Printf("Received SIGTERM signal\n")
+				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
 				if err := command.callFakeEndpoint(ctx, payload); err != nil {
@@ -119,14 +119,14 @@ func (command *FakeEndpoint) callFakeEndpoint(ctx context.Context, payload crypt
 
 	span.SetStatus(codes.Ok, "Fake endpoint operation completed successfully")
 
-	command.logger.Println("Fake endpoint response:\n", string(marshalledResp))
-	command.logger.Printf("Fake endpoint call took: %fµs\n", float64(durationElapsedFakeEndpoint.Nanoseconds())/1000.0)
+	command.logger.Info("Fake endpoint response", "response", string(marshalledResp))
+	command.logger.Info("Fake endpoint call took", "duration_microseconds", float64(durationElapsedFakeEndpoint.Nanoseconds())/1000.0)
 
 	return nil
 }
 
 // gracefulShutdown closes library connection.
 func (command *FakeEndpoint) gracefulShutdown() error {
-	command.logger.Printf("Closing crypto broker library connection\n")
+	command.logger.Info("Closing crypto broker library connection")
 	return command.cryptoBrokerLibrary.Close()
 }

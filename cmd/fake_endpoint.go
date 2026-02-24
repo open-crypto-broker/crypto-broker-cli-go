@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
+	"log/slog"
 	"time"
 
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/clog"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/command"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/flags"
@@ -27,23 +27,25 @@ var fakeEndpointCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if err := flags.ValidateFlagLoop(flags.Loop); err != nil {
-			log.Fatalf("Invalid loop flag value: %v", err)
+			slog.Error("Invalid loop flag value", "error", err)
+			panic(err)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := log.New(os.Stdout, "CLIENT: ", log.Ldate|log.Lmicroseconds)
-
 		ctx := cmd.Context()
+		logger := clog.SetupGlobalLogger(ctx)
+
 		tracerProvider, err := otel.NewTracerProvider(ctx, "crypto-broker-cli-go", "0.0.0")
 		if err != nil {
-			log.Fatalf("Failed to initialize tracer provider: %v", err)
+			logger.Error("Failed to initialize tracer provider", "error", err)
+			panic(err)
 		}
 
 		shutdownTracer := func() {
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 			if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
-				log.Printf("Warning: Failed to shutdown tracer provider: %v", err)
+				logger.Warn("Failed to shutdown tracer provider", "error", err)
 			}
 		}
 		defer shutdownTracer()
@@ -51,18 +53,21 @@ var fakeEndpointCmd = &cobra.Command{
 		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 		if err != nil {
 			shutdownTracer()
-			log.Fatalf("Failed to initialize library: %v", err)
+			logger.Error("Failed to initialize library", "error", err)
+			panic(err)
 		}
 
 		fakeEndpointCommand, err := command.NewFakeEndpoint(ctx, lib, logger, tracerProvider)
 		if err != nil {
 			shutdownTracer()
-			log.Fatalf("Failed to initialize fake endpoint command: %v", err)
+			logger.Error("Failed to initialize fake endpoint command", "error", err)
+			panic(err)
 		}
 
 		if err := fakeEndpointCommand.Run(ctx, flags.Loop); err != nil {
 			shutdownTracer()
-			log.Fatalf("Failed to run fake endpoint command: %v", err)
+			logger.Error("Failed to run fake endpoint command", "error", err)
+			panic(err)
 		}
 	},
 }

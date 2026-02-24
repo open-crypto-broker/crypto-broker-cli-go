@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"strings"
@@ -21,13 +21,13 @@ import (
 )
 
 type Sign struct {
-	logger              *log.Logger
+	logger              *slog.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 	tracerProvider      *otel.TracerProvider
 }
 
 // InitSign initializes sign command. This may panic in case of failure.
-func NewSign(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Sign, error) {
+func NewSign(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*Sign, error) {
 	return &Sign{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
@@ -82,7 +82,7 @@ func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, fileP
 		for {
 			select {
 			case <-c:
-				command.logger.Printf("Received SIGTERM signal\n")
+				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
 				if err := command.signCertificate(ctx, payload, flagEncoding); err != nil {
@@ -152,15 +152,15 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 	span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.SignedCertificate)))
 	span.SetStatus(codes.Ok, "Certificate signing completed successfully")
 
-	command.logger.Printf("Sign Response:\n%s", string(marshalledResp))
-	command.logger.Printf("Certificate Signing took: %fµs\n", float64(durationElapsedSign.Nanoseconds())/1000.0)
+	command.logger.Info("Sign Response", "response", string(marshalledResp))
+	command.logger.Info("Certificate Signing took", "duration_microseconds", float64(durationElapsedSign.Nanoseconds())/1000.0)
 
 	return nil
 }
 
 // gracefulShutdown closes library connection.
 func (command *Sign) gracefulShutdown() error {
-	command.logger.Printf("Closing crypto broker library connection\n")
+	command.logger.Info("Closing crypto broker library connection")
 	return command.cryptoBrokerLibrary.Close()
 }
 

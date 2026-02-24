@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,13 +23,13 @@ import (
 
 // Hash represents command that repeatedly sends hash request to crypto broker and displays its response
 type Hash struct {
-	logger              *log.Logger
+	logger              *slog.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 	tracerProvider      *otel.TracerProvider
 }
 
 // NewHash initializes hash command
-func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Hash, error) {
+func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*Hash, error) {
 	return &Hash{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
@@ -47,7 +47,7 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 		Metadata: nil, // Will be set in hashBytes with trace context
 	}
 
-	command.logger.Printf("Hashing \"%s\" using %s profile \n", string(input), flagProfile)
+	command.logger.Info("Hashing input", "input", string(input), "profile", flagProfile)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -61,7 +61,7 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 		for {
 			select {
 			case <-c:
-				command.logger.Printf("Received SIGTERM signal\n")
+				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
 				if err := command.hashBytes(ctx, payload); err != nil {
@@ -130,14 +130,14 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 	)
 	span.SetStatus(codes.Ok, "Hash operation completed successfully")
 
-	command.logger.Println("Hashed response:\n", string(marshalledResp))
-	command.logger.Printf("Data Hashing took: %fµs\n", float64(durationElapsedHashing.Nanoseconds())/1000.0)
+	command.logger.Info("Hashed response", "response", string(marshalledResp))
+	command.logger.Info("Data Hashing took", "duration_microseconds", float64(durationElapsedHashing.Nanoseconds())/1000.0)
 
 	return nil
 }
 
 // gracefulShutdown closes library connection.
 func (command *Hash) gracefulShutdown() error {
-	command.logger.Printf("Closing crypto broker library connection\n")
+	command.logger.Info("Closing crypto broker library connection")
 	return command.cryptoBrokerLibrary.Close()
 }

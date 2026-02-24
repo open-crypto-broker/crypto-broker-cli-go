@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,13 +19,13 @@ import (
 
 // Health represents command that checks broker server health status
 type Health struct {
-	logger              *log.Logger
+	logger              *slog.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 	tracerProvider      *otel.TracerProvider
 }
 
 // NewHealth initializes health command
-func NewHealth(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Health, error) {
+func NewHealth(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*Health, error) {
 	return &Health{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
@@ -37,7 +37,7 @@ func NewHealth(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *l
 func (command *Health) Run(ctx context.Context, flagLoop int) error {
 	defer command.gracefulShutdown()
 
-	command.logger.Printf("Checking broker server health\n")
+	command.logger.Info("Checking broker server health")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -51,7 +51,7 @@ func (command *Health) Run(ctx context.Context, flagLoop int) error {
 		for {
 			select {
 			case <-c:
-				command.logger.Printf("Received SIGTERM signal\n")
+				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
 				if err := command.checkHealth(ctx); err != nil {
@@ -91,14 +91,14 @@ func (command *Health) checkHealth(ctx context.Context) error {
 
 	span.SetStatus(codes.Ok, "Health check completed successfully")
 
-	command.logger.Println("Health check response:\n", string(marshalledResp))
-	command.logger.Printf("Health check took: %fµs\n", float64(durationElapsed.Nanoseconds())/1000.0)
+	command.logger.Info("Health check response", "response", string(marshalledResp))
+	command.logger.Info("Health check took", "duration_microseconds", float64(durationElapsed.Nanoseconds())/1000.0)
 
 	return nil
 }
 
 // gracefulShutdown closes library connection.
 func (command *Health) gracefulShutdown() error {
-	command.logger.Printf("Closing crypto broker library connection\n")
+	command.logger.Info("Closing crypto broker library connection")
 	return command.cryptoBrokerLibrary.Close()
 }
