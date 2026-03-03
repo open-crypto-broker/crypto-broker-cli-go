@@ -35,16 +35,20 @@ jobs:
           mkdir profiles
           cp example-profiles/Profiles.yaml ./profiles/
           CRYPTO_BROKER_LOG_LEVEL=error CRYPTO_BROKER_PROFILES_DIR=$(pwd)/profiles OTEL_TRACES_SAMPLER=always_off go run cmd/server/server.go &
+          SERVER_PID=$!
           cd ..
           task run-benchmarks
+          kill $SERVER_PID
 
       - name: Run benchmarks with FIPS mode enabled
         continue-on-error: true
         run: |
           cd crypto-broker-server
           GOFIPS140=v1.0.0 CRYPTO_BROKER_LOG_LEVEL=error CRYPTO_BROKER_PROFILES_DIR=$(pwd)/profiles OTEL_TRACES_SAMPLER=always_off go run cmd/server/server.go &
+          SERVER_PID=$!
           cd ..
           task run-benchmarks
+          kill $SERVER_PID
 
       - name: Run CI task from Taskfile
         run: task ci
