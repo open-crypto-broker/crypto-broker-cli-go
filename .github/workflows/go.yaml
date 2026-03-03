@@ -41,11 +41,7 @@ jobs:
       - name: Run benchmarks with FIPS mode enabled
         continue-on-error: true
         run: |
-          git clone -b main --single-branch https://github.com/open-crypto-broker/crypto-broker-server.git
-          git submodule update --init
           cd crypto-broker-server
-          mkdir profiles
-          cp example-profiles/Profiles.yaml ./profiles/
           GOFIPS140=v1.0.0 CRYPTO_BROKER_LOG_LEVEL=error CRYPTO_BROKER_PROFILES_DIR=$(pwd)/profiles OTEL_TRACES_SAMPLER=always_off go run cmd/server/server.go &
           cd ..
           task run-benchmarks
