@@ -30,5 +30,5 @@ const (
 
 // predefined service name
 const (
-	serviceName = "crypto-broker-cli"
+	serviceName = "crypto-broker-cli-go"
 )

@@ -131,7 +131,9 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 	span.SetStatus(codes.Ok, "Hash operation completed successfully")
 
 	command.logger.Info("Hashed response", "response", string(marshalledResp))
-	command.logger.Info("Data Hashing took", "duration_microseconds", float64(durationElapsedHashing.Nanoseconds())/1000.0)
+	command.logger.Info(
+		fmt.Sprintf("Data Hashing took %d µs", durationElapsedHashing.Microseconds()),
+	)
 
 	return nil
 }

@@ -115,8 +115,9 @@ func (command *Benchmark) runBenchmark(ctx context.Context) error {
 	span.SetStatus(codes.Ok, "Benchmark operation completed successfully")
 
 	command.logger.Info("Benchmark results", "results", string(marshalledResp))
-	command.logger.Info("Benchmark execution took", "duration_microseconds", float64(durationElapsed.Nanoseconds())/1000.0)
-
+	command.logger.Info(
+		fmt.Sprintf("Server-side Benchmarking took %d µs", durationElapsed.Microseconds()),
+	)
 	return nil
 }
 

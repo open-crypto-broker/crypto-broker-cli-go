@@ -153,7 +153,9 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 	span.SetStatus(codes.Ok, "Certificate signing completed successfully")
 
 	command.logger.Info("Sign Response", "response", string(marshalledResp))
-	command.logger.Info("Certificate Signing took", "duration_microseconds", float64(durationElapsedSign.Nanoseconds())/1000.0)
+	command.logger.Info(
+		fmt.Sprintf("Certificate Signing took %d µs", durationElapsedSign.Microseconds()),
+	)
 
 	return nil
 }
