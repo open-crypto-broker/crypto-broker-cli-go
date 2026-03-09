@@ -35,7 +35,8 @@ var healthCmd = &cobra.Command{
 		logger := clog.SetupGlobalLogger(ctx)
 
 		// Initialize tracing
-		tracerProvider, err := otel.NewTracerProvider(ctx, "crypto-broker-cli-go", "0.0.0")
+		ctx := cmd.Context()
+		tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 		if err != nil {
 			logger.Error("Failed to initialize tracer provider", "error", err)
 			panic(err)

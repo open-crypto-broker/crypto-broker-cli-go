@@ -25,5 +25,32 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Run benchmarks
+        continue-on-error: true
+        run: |
+          git config --global --add safe.directory /__w/crypto-broker-cli-go/crypto-broker-cli-go
+          git clone -b main --single-branch https://github.com/open-crypto-broker/crypto-broker-server.git
+          git submodule update --init
+          cd crypto-broker-server
+          mkdir profiles
+          cp example-profiles/Profiles.yaml ./profiles/
+          go build -o bin/cryptobroker-server-non-fips cmd/server/server.go
+          CRYPTO_BROKER_LOG_LEVEL=error CRYPTO_BROKER_PROFILES_DIR=$(pwd)/profiles OTEL_TRACES_SAMPLER=always_off ./bin/cryptobroker-server-non-fips &
+          SERVER_PID=$!
+          cd ..
+          task run-benchmarks
+          kill $SERVER_PID
+
+      - name: Run benchmarks with FIPS mode enabled
+        continue-on-error: true
+        run: |
+          cd crypto-broker-server
+          GOFIPS140=v1.0.0 go build -o bin/cryptobroker-server-fips cmd/server/server.go
+          CRYPTO_BROKER_LOG_LEVEL=error CRYPTO_BROKER_PROFILES_DIR=$(pwd)/profiles OTEL_TRACES_SAMPLER=always_off ./bin/cryptobroker-server-fips &
+          SERVER_PID=$!
+          cd ..
+          task run-benchmarks
+          kill $SERVER_PID
+
       - name: Run CI task from Taskfile
         run: task ci

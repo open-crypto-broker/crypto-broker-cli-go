@@ -14,6 +14,8 @@ A version of [Golang](https://go.dev/doc/install) > 1.25 installed on your local
 
 For running the commands using the `Taskfile` tool, you need to have Taskfile installed. Please check the documentation on [how to install Taskfile](https://taskfile.dev/installation/). If you don't have Taskfile support, you can directly use the commands specified in the Taskfile on your local terminal, provided you meet the requirements.
 
+Please note, that `Taskfile` may use `.env` file as source of environment variables. For convenience, please copy `.env.example` file into `.env` and adjust env variables.
+
 To contribute to this project please configure the custom githooks for this project:
 
 ```bash

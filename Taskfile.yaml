@@ -1,12 +1,10 @@
 version: '3'
 
+dotenv:
+  - .env
+
 vars:
-  PROTOBUF_VERSION: "32.1"
-  OTEL_TRACES_EXPORTER: "console" # 'otlphttp', 'otlpgrpc', 'console', or comma-separated list like 'console,otlphttp', 'console,otlpgrpc'
-  OTEL_EXPORTER_OTLP_ENDPOINT: "localhost:4317" # Valid URL (only used when OTLP exporter is enabled)
-  OTEL_TRACES_SAMPLER: "always_off" # always_on, always_off, traceidratio, parentbased_always_on, parentbased_always_off, parentbased_traceidratio.
-  OTEL_TRACES_SAMPLER_ARG: "0.1" # Sampling ratio (0.0-1.0) when using ratio-based samplers like traceidratio or parentbased_traceidratio.
-  OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION: "Api-Token API_TOKEN_HERE" # Authorization header for OTLP exporter
+  
   # GNU grep support depending on OS
   GREP_CMD:
     sh: |
@@ -16,6 +14,11 @@ vars:
       esac
 
 tasks:
+
+  env:
+    desc: "Copies example environment variables to .env file"
+    cmds:
+      - cp .env.example .env
 
   bash-add-go-path:
     desc: "Add Go binary folder to .bashrc if it does not already exists"
@@ -60,6 +63,7 @@ tasks:
       - ./*.go
       - go.mod
       - go.sum
+      - .env
     generates:
       - bin/go-client-cli
 
@@ -67,7 +71,6 @@ tasks:
     desc: "Build Docker image for the Go client app"
     vars:
       TAG: '{{.TAG | default "dev"}}'
-    dotenv: ['.env']
     cmds:
       - docker buildx build -f docker/Dockerfile -t ghcr.io/open-crypto-broker/test_app_go:{{.TAG}} .
 
@@ -80,20 +83,38 @@ tasks:
   test-hash:
     deps: [build]
     desc: "Test hashing command with Default profile"
+    env:
+      OTEL_TRACES_EXPORTER: '{{.OTEL_TRACES_EXPORTER}}'
+      OTEL_EXPORTER_OTLP_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_ENDPOINT}}'
+      OTEL_TRACES_SAMPLER: '{{.OTEL_TRACES_SAMPLER}}'
+      OTEL_TRACES_SAMPLER_ARG: '{{.OTEL_TRACES_SAMPLER_ARG}}'
+      OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION: '{{.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION}}'
     cmds:
-      - OTEL_TRACES_EXPORTER={{.OTEL_TRACES_EXPORTER}} OTEL_EXPORTER_OTLP_ENDPOINT={{.OTEL_EXPORTER_OTLP_ENDPOINT}} OTEL_TRACES_SAMPLER={{.OTEL_TRACES_SAMPLER}} OTEL_TRACES_SAMPLER_ARG={{.OTEL_TRACES_SAMPLER_ARG}} OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION="{{.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION}}" ./bin/go-client-cli hash "Hello" --profile=Default
+      - ./bin/go-client-cli hash "Hello" --profile=Default
 
   test-health:
     deps: [build]
     desc: "Test health check command"
+    env:
+      OTEL_TRACES_EXPORTER: '{{.OTEL_TRACES_EXPORTER}}'
+      OTEL_EXPORTER_OTLP_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_ENDPOINT}}'
+      OTEL_TRACES_SAMPLER: '{{.OTEL_TRACES_SAMPLER}}'
+      OTEL_TRACES_SAMPLER_ARG: '{{.OTEL_TRACES_SAMPLER_ARG}}'
+      OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION: '{{.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION}}'
     cmds:
-      - OTEL_TRACES_EXPORTER={{.OTEL_TRACES_EXPORTER}} OTEL_EXPORTER_OTLP_ENDPOINT={{.OTEL_EXPORTER_OTLP_ENDPOINT}} OTEL_TRACES_SAMPLER={{.OTEL_TRACES_SAMPLER}} OTEL_TRACES_SAMPLER_ARG={{.OTEL_TRACES_SAMPLER_ARG}} OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION="{{.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION}}" ./bin/go-client-cli health
+      - ./bin/go-client-cli health
 
   test-benchmark:
     deps: [build]
     desc: "Test benchmark command"
+    env:
+      OTEL_TRACES_EXPORTER: '{{.OTEL_TRACES_EXPORTER}}'
+      OTEL_EXPORTER_OTLP_ENDPOINT: '{{.OTEL_EXPORTER_OTLP_ENDPOINT}}'
+      OTEL_TRACES_SAMPLER: '{{.OTEL_TRACES_SAMPLER}}'
+      OTEL_TRACES_SAMPLER_ARG: '{{.OTEL_TRACES_SAMPLER_ARG}}'
+      OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION: '{{.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION}}'
     cmds:
-      - OTEL_TRACES_EXPORTER={{.OTEL_TRACES_EXPORTER}} OTEL_EXPORTER_OTLP_ENDPOINT={{.OTEL_EXPORTER_OTLP_ENDPOINT}} OTEL_TRACES_SAMPLER={{.OTEL_TRACES_SAMPLER}} OTEL_TRACES_SAMPLER_ARG={{.OTEL_TRACES_SAMPLER_ARG}} OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION="{{.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION}}" ./bin/go-client-cli benchmark
+      - ./bin/go-client-cli benchmark
 
   test-sign:
     deps: [build]
@@ -113,6 +134,17 @@ tasks:
         else
           echo -e "Certificate signing failed"
         fi
+
+  # More about benchmarks:
+  # - https://pkg.go.dev/testing@go1.25.3#hdr-Benchmarks
+  # - https://go.googlesource.com/proposal/+/master/design/14313-benchmark-format.md
+  # - go help testflag
+  run-benchmarks:
+    desc: "Command runs benchmarks"
+    env:
+      OTEL_TRACES_SAMPLER: 'always_off'
+    cmds:
+      - go test ./... -benchmem -run=^$ -bench ^Benchmark
 
   ################# Continuous Improvement Tasks ####################
   check-dependencies:
