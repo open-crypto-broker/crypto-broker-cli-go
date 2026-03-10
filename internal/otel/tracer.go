@@ -106,7 +106,7 @@ func NewTracerProvider(ctx context.Context, logger *slog.Logger, serviceName, se
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceNameKey.String(serviceName),
+			semconv.ServiceNameKey.String(ServiceName),
 			semconv.ServiceVersionKey.String(serviceVersion),
 			semconv.ServiceNamespaceKey.String("crypto-broker"),
 		),
@@ -126,7 +126,7 @@ func NewTracerProvider(ctx context.Context, logger *slog.Logger, serviceName, se
 	otel.SetTracerProvider(tp)
 
 	logger.Info("OpenTelemetry tracer provider initialized",
-		"service_name", serviceName,
+		"service_name", ServiceName,
 		"service_version", serviceVersion,
 		"exporters", tracesExporter,
 		"sampler", samplerName)

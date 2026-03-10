@@ -19,7 +19,7 @@ func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "", "")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
@@ -54,7 +54,7 @@ func BenchmarkHash_profile_Default_Parallel(b *testing.B) {
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "", "")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}

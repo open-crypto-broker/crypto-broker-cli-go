@@ -34,7 +34,7 @@ var benchmarkCmd = &cobra.Command{
 		ctx := cmd.Context()
 		logger := clog.SetupGlobalLogger(ctx)
 
-		tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+		tracerProvider, err := otel.NewTracerProvider(ctx, logger, "", "")
 		if err != nil {
 			logger.Error("Failed to initialize tracer provider", "error", err)
 			panic(err)
