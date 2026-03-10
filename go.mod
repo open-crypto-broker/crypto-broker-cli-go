@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20260209100752-f120576c8db5
+	github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20260309133429-233bc4fa0bcf
 	github.com/spf13/cobra v1.10.2
 	go.opentelemetry.io/otel v1.40.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.39.0
