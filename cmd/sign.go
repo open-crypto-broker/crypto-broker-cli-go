@@ -50,7 +50,7 @@ var signCmd = &cobra.Command{
 		ctx := cmd.Context()
 		logger := clog.SetupGlobalLogger(ctx)
 
-		tracerProvider, err := otel.NewTracerProvider(ctx, logger, "", "")
+		tracerProvider, err := otel.NewTracerProvider(ctx, logger)
 		if err != nil {
 			logger.Error("Failed to initialize tracer provider", "error", err)
 			panic(err)
