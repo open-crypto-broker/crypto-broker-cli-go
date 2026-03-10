@@ -35,6 +35,7 @@ jobs:
           mkdir profiles
           cp example-profiles/Profiles.yaml ./profiles/
           go build -o bin/cryptobroker-server-non-fips cmd/server/server.go
+          go version -m ./bin/cryptobroker-server-non-fips
           CRYPTO_BROKER_LOG_LEVEL=error CRYPTO_BROKER_PROFILES_DIR=$(pwd)/profiles OTEL_TRACES_SAMPLER=always_off ./bin/cryptobroker-server-non-fips &
           SERVER_PID=$!
           cd ..
@@ -46,6 +47,7 @@ jobs:
         run: |
           cd crypto-broker-server
           GOFIPS140=v1.0.0 go build -o bin/cryptobroker-server-fips cmd/server/server.go
+          go version -m ./bin/cryptobroker-server-fips
           CRYPTO_BROKER_LOG_LEVEL=error CRYPTO_BROKER_PROFILES_DIR=$(pwd)/profiles OTEL_TRACES_SAMPLER=always_off ./bin/cryptobroker-server-fips &
           SERVER_PID=$!
           cd ..
