@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 	"io"
-	"log"
+	"log/slog"
 	"testing"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
@@ -12,7 +12,13 @@ import (
 
 func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
@@ -41,7 +47,13 @@ func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
 
 func BenchmarkHash_profile_Default_Parallel(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())

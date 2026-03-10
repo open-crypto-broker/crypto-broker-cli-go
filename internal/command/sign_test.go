@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 	"io"
-	"log"
+	"log/slog"
 	"testing"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
@@ -12,7 +12,13 @@ import (
 
 func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
@@ -74,7 +80,13 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 
 func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
@@ -140,7 +152,13 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 
 func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
@@ -205,7 +223,13 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 
 func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
@@ -274,7 +298,13 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 
 func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
@@ -334,7 +364,13 @@ f/KE4vY=
 
 func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testing.B) {
 	ctx := context.Background()
-	logger := log.New(io.Discard, "TEST: ", log.Ldate|log.Lmicroseconds)
+	logger := slog.New(
+		slog.NewTextHandler(
+			io.Discard, &slog.HandlerOptions{
+				AddSource: false,
+			},
+		),
+	)
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
