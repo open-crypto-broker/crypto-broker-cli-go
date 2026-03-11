@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -20,13 +20,13 @@ import (
 
 // Benchmark represents command that runs server-side cryptographic benchmarks
 type Benchmark struct {
-	logger              *log.Logger
+	logger              *slog.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 	tracerProvider      *otel.TracerProvider
 }
 
 // NewBenchmark initializes benchmark command
-func NewBenchmark(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *log.Logger, tracerProvider *otel.TracerProvider) (*Benchmark, error) {
+func NewBenchmark(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*Benchmark, error) {
 	return &Benchmark{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
@@ -38,7 +38,7 @@ func NewBenchmark(ctx context.Context, lib *cryptobrokerclientgo.Library, logger
 func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
 	defer command.gracefulShutdown()
 
-	command.logger.Printf("Running server-side benchmarks\n")
+	command.logger.Info("Running server-side benchmarks")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -52,7 +52,7 @@ func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
 		for {
 			select {
 			case <-c:
-				command.logger.Printf("Received SIGTERM signal\n")
+				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
 				if err := command.runBenchmark(ctx); err != nil {
@@ -114,14 +114,15 @@ func (command *Benchmark) runBenchmark(ctx context.Context) error {
 	span.SetAttributes(otel.AttributeCryptoBenchmarkResultsSize.Int(len(marshalledResp)))
 	span.SetStatus(codes.Ok, "Benchmark operation completed successfully")
 
-	command.logger.Println("Benchmark results:\n", string(marshalledResp))
-	command.logger.Printf("Benchmark execution took: %fµs\n", float64(durationElapsed.Nanoseconds())/1000.0)
-
+	command.logger.Info("Benchmark results", "results", string(marshalledResp))
+	command.logger.Info(
+		fmt.Sprintf("Server-side Benchmarking took %d µs", durationElapsed.Microseconds()),
+	)
 	return nil
 }
 
 // gracefulShutdown closes library connection.
 func (command *Benchmark) gracefulShutdown() error {
-	command.logger.Printf("Closing crypto broker library connection\n")
+	command.logger.Info("Closing crypto broker library connection")
 	return command.cryptoBrokerLibrary.Close()
 }
