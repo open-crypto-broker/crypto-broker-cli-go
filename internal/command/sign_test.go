@@ -19,7 +19,7 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential(b *testin
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger)
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
@@ -87,7 +87,7 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(b *testing.
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger)
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
@@ -159,7 +159,7 @@ func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential(b *test
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger)
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
@@ -230,7 +230,7 @@ func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testin
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger)
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
@@ -305,7 +305,7 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential(b *test
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger)
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
@@ -371,7 +371,7 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testin
 			},
 		),
 	)
-	tracerProvider, err := otel.NewTracerProvider(ctx, logger, "crypto-broker-cli-go", "0.0.0")
+	tracerProvider, err := otel.NewTracerProvider(ctx, logger)
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}

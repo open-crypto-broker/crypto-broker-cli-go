@@ -16,13 +16,72 @@ import (
 	"go.opentelemetry.io/otel/sdk/log"
 )
 
+var (
+	logsExporter = ""
+	logLevel     = slog.LevelInfo
+	logOutput    = os.Stdout
+	logHandler   slog.Handler
+	serviceName  = defaultServiceName
+	otlpEndpoint = ""
+	apiToken     = ""
+)
+
+func init() {
+	if customServiceName := os.Getenv(env.OTEL_SERVICE_NAME); customServiceName != "" {
+		serviceName = customServiceName
+	}
+
+	apiToken = os.Getenv(env.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION)
+	otlpEndpoint = os.Getenv(env.OTEL_EXPORTER_OTLP_ENDPOINT)
+	logsExporter = strings.ToLower(strings.TrimSpace(os.Getenv(env.OTEL_LOGS_EXPORTER)))
+	if userProvidedLogLevel := strings.ToLower(os.Getenv(env.LOG_LEVEL)); userProvidedLogLevel != "" {
+		switch userProvidedLogLevel {
+		case strings.ToLower(logLevelDebug):
+			logLevel = slog.LevelDebug
+		case strings.ToLower(logLevelInfo):
+			logLevel = slog.LevelInfo
+		case strings.ToLower(logLevelWarn):
+			logLevel = slog.LevelWarn
+		case strings.ToLower(logLevelError):
+			logLevel = slog.LevelError
+		default:
+			panic(fmt.Sprintf("invalid log level provided: %s, available levels: %s, %s, %s, %s",
+				userProvidedLogLevel, logLevelDebug, logLevelInfo, logLevelWarn, logLevelError))
+		}
+	}
+
+	if userProvidedLogOutput := strings.ToLower(os.Getenv(env.LOG_OUTPUT)); userProvidedLogOutput != "" {
+		switch userProvidedLogOutput {
+		case strings.ToLower(logOutputStdout):
+			logOutput = os.Stdout
+		case strings.ToLower(logOutputStderr):
+			logOutput = os.Stderr
+		default:
+			panic(fmt.Sprintf("invalid log output provided: %s, available outputs: %s, %s",
+				userProvidedLogOutput, logOutputStdout, logOutputStderr))
+		}
+	}
+
+	logHandler = slog.NewJSONHandler(logOutput, &slog.HandlerOptions{Level: logLevel}) // default
+	userProvidedLogFormat := strings.ToLower(os.Getenv(env.LOG_FORMAT))
+	if userProvidedLogFormat != "" {
+		switch userProvidedLogFormat {
+		case strings.ToLower(logFormatJSON):
+			logHandler = slog.NewJSONHandler(logOutput, &slog.HandlerOptions{Level: logLevel})
+		case strings.ToLower(logFormatText):
+			logHandler = slog.NewTextHandler(logOutput, &slog.HandlerOptions{Level: logLevel})
+		default:
+			panic(fmt.Sprintf("invalid log format provided: %s, available formats: %s, %s",
+				userProvidedLogFormat, logFormatJSON, logFormatText))
+		}
+	}
+}
+
 // SetupGlobalLogger initializes the crypto broker logger.
 // It predefines defaults for logger. If user provides custom values that are not supported by the logger, it panics.
 // It sets the logger to the default global logger.
 // Supports OTEL_LOGS_EXPORTER with values: "console", "otlp", "otlphttp", "otlpgrpc", or comma-separated combinations
 func SetupGlobalLogger(ctx context.Context) *slog.Logger {
-	logsExporter := strings.ToLower(strings.TrimSpace(os.Getenv(env.OTEL_LOGS_EXPORTER)))
-
 	exporters := strings.Split(logsExporter, ",")
 	for i, exporter := range exporters {
 		exporters[i] = strings.TrimSpace(exporter)
@@ -72,54 +131,6 @@ func SetupGlobalLogger(ctx context.Context) *slog.Logger {
 // setupConsoleLogger sets up the traditional console-based logging
 // this function may panic if the log level or log output is invalid
 func setupConsoleLogger() *slog.Logger {
-	logLevel := slog.LevelInfo
-	userProvidedLogLevel := strings.ToLower(os.Getenv(env.LOG_LEVEL))
-	if userProvidedLogLevel != "" {
-		switch userProvidedLogLevel {
-		case strings.ToLower(logLevelDebug):
-			logLevel = slog.LevelDebug
-		case strings.ToLower(logLevelInfo):
-			logLevel = slog.LevelInfo
-		case strings.ToLower(logLevelWarn):
-			logLevel = slog.LevelWarn
-		case strings.ToLower(logLevelError):
-			logLevel = slog.LevelError
-		default:
-			panic(fmt.Sprintf("invalid log level provided: %s, available levels: %s, %s, %s, %s",
-				userProvidedLogLevel, logLevelDebug, logLevelInfo, logLevelWarn, logLevelError))
-		}
-	}
-
-	var logOutput *os.File
-	logOutput = os.Stdout // default
-	userProvidedLogOutput := strings.ToLower(os.Getenv(env.LOG_OUTPUT))
-	if userProvidedLogOutput != "" {
-		switch userProvidedLogOutput {
-		case strings.ToLower(logOutputStdout):
-			logOutput = os.Stdout
-		case strings.ToLower(logOutputStderr):
-			logOutput = os.Stderr
-		default:
-			panic(fmt.Sprintf("invalid log output provided: %s, available outputs: %s, %s",
-				userProvidedLogOutput, logOutputStdout, logOutputStderr))
-		}
-	}
-
-	var logHandler slog.Handler
-	logHandler = slog.NewJSONHandler(logOutput, &slog.HandlerOptions{Level: logLevel}) // default
-	userProvidedLogFormat := strings.ToLower(os.Getenv(env.LOG_FORMAT))
-	if userProvidedLogFormat != "" {
-		switch userProvidedLogFormat {
-		case strings.ToLower(logFormatJSON):
-			logHandler = slog.NewJSONHandler(logOutput, &slog.HandlerOptions{Level: logLevel})
-		case strings.ToLower(logFormatText):
-			logHandler = slog.NewTextHandler(logOutput, &slog.HandlerOptions{Level: logLevel})
-		default:
-			panic(fmt.Sprintf("invalid log format provided: %s, available formats: %s, %s",
-				userProvidedLogFormat, logFormatJSON, logFormatText))
-		}
-	}
-
 	logger := slog.New(logHandler)
 	fixedLogger := logger.With(slog.String("service", serviceName))
 	slog.SetDefault(fixedLogger)
@@ -196,7 +207,6 @@ func (h *multiHandler) WithGroup(name string) slog.Handler {
 // setupOTLPLogger sets up OpenTelemetry OTLP logging
 // Automatically detects protocol: HTTP for full URLs, gRPC for host:port
 func setupOTLPLogger(ctx context.Context) *slog.Logger {
-	otlpEndpoint := os.Getenv(env.OTEL_EXPORTER_OTLP_ENDPOINT)
 	isHTTP := strings.HasPrefix(otlpEndpoint, "http://") || strings.HasPrefix(otlpEndpoint, "https://")
 	if isHTTP {
 		return setupOTLPLoggerHTTP(ctx, otlpEndpoint)
@@ -207,8 +217,6 @@ func setupOTLPLogger(ctx context.Context) *slog.Logger {
 
 // setupOTLPLoggerWithProtocol sets up OpenTelemetry OTLP logging with explicit protocol
 func setupOTLPLoggerWithProtocol(ctx context.Context, protocol string) *slog.Logger {
-	otlpEndpoint := os.Getenv(env.OTEL_EXPORTER_OTLP_ENDPOINT)
-
 	switch protocol {
 	case "http":
 		return setupOTLPLoggerHTTP(ctx, otlpEndpoint)
@@ -243,7 +251,7 @@ func setupOTLPLoggerHTTP(ctx context.Context, otlpEndpoint string) *slog.Logger 
 	// Remove /v1/logs suffix if present in the path, as otlploghttp will add it automatically
 	urlPath = strings.TrimSuffix(urlPath, "/v1/logs")
 	headers := make(map[string]string)
-	if apiToken := os.Getenv(env.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION); apiToken != "" {
+	if apiToken != "" {
 		headers["Authorization"] = apiToken
 	}
 
@@ -297,7 +305,7 @@ func setupOTLPLoggerGRPC(ctx context.Context, otlpEndpoint string) *slog.Logger 
 	parts := strings.SplitN(otlpEndpoint, "/", 2)
 	endpointHost = parts[0]
 	headers := make(map[string]string)
-	if apiToken := os.Getenv(env.OTEL_EXPORTER_OTLP_HEADERS_AUTHORIZATION); apiToken != "" {
+	if apiToken != "" {
 		headers["authorization"] = apiToken
 	}
 
