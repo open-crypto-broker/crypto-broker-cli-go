@@ -92,6 +92,7 @@ func (command *Health) checkHealth(ctx context.Context) error {
 	span.SetStatus(codes.Ok, "Health check completed successfully")
 
 	command.logger.Info("Health check response", "response", string(marshalledResp))
+	command.logger.Info(fmt.Sprintf("Health check Status: %s", responseBody.Status))
 	command.logger.Info("Health check took", "duration_microseconds", float64(durationElapsed.Nanoseconds())/1000.0)
 
 	return nil
