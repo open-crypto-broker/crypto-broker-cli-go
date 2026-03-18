@@ -53,7 +53,7 @@ tasks:
     desc: "Build CLI"
     deps: [format, lint]
     vars:
-      APP_NAME: {{.APP_NAME | default "go-client-cli"}}
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - go build -o ./bin/{{.APP_NAME}} main.go
     sources:
@@ -78,7 +78,7 @@ tasks:
   delete-binary:
     desc: "Delete binary artifact"
     vars:
-      APP_NAME: {{.APP_NAME | default "go-client-cli"}}
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - rm bin/{{.APP_NAME}}
 
@@ -87,7 +87,7 @@ tasks:
     deps: [build]
     desc: "Test benchmark command to request a server-side benchmark"
     vars:
-      APP_NAME: {{.APP_NAME | default "go-client-cli"}}
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - ./bin/{{.APP_NAME}} benchmark
 
@@ -95,7 +95,7 @@ tasks:
     deps: [build]
     desc: "Test hashing command with Default profile"
     vars:
-      APP_NAME: {{.APP_NAME | default "go-client-cli"}}
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - ./bin/{{.APP_NAME}} hash "Hello" --profile=Default
 
@@ -103,7 +103,7 @@ tasks:
     deps: [build]
     desc: "Requests the server status using the CLI's health command"
     vars:
-      APP_NAME: {{.APP_NAME | default "go-client-cli"}}
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - ./bin/{{.APP_NAME}} health
 
@@ -111,7 +111,7 @@ tasks:
     deps: [build]
     desc: "Test certificate signing command with Default profile"
     vars:
-      APP_NAME: {{.APP_NAME | default "go-client-cli"}}
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - |
         rm -rf $TEST_OUTPUT_DIR
