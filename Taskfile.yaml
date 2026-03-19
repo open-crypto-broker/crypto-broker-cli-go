@@ -3,7 +3,6 @@ version: '3'
 dotenv: ['.env']
 
 vars:
-  CLI_NAME: "go-client-cli"
   # GNU grep support depending on OS
   GREP_CMD:
     sh: |
@@ -53,9 +52,10 @@ tasks:
   build:
     desc: "Build CLI"
     deps: [format, lint]
-    dir: .
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
-      - go build -o ./bin/{{.CLI_NAME}} main.go
+      - go build -o ./bin/{{.APP_NAME}} main.go
     sources:
       - main.go
       - internal/**/*.go
@@ -64,7 +64,7 @@ tasks:
       - go.sum
       - .env
     generates:
-      - bin/{{.CLI_NAME}}
+      - bin/{{.APP_NAME}}
 
   build-docker:
     desc: "Build Docker image for the Go client app"
@@ -77,36 +77,46 @@ tasks:
 
   delete-binary:
     desc: "Delete binary artifact"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
-      - rm bin/{{.CLI_NAME}}
+      - rm bin/{{.APP_NAME}}
 
   ################# Tests ####################
   test-benchmark:
     deps: [build]
     desc: "Test benchmark command to request a server-side benchmark"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
-      - ./bin/{{.CLI_NAME}} benchmark
+      - ./bin/{{.APP_NAME}} benchmark
 
   test-hash:
     deps: [build]
     desc: "Test hashing command with Default profile"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
-      - ./bin/{{.CLI_NAME}} hash "Hello" --profile=Default
+      - ./bin/{{.APP_NAME}} hash "Hello" --profile=Default
 
   test-health:
     deps: [build]
     desc: "Requests the server status using the CLI's health command"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
-      - ./bin/{{.CLI_NAME}} health
+      - ./bin/{{.APP_NAME}} health
 
   test-sign:
     deps: [build]
     desc: "Test certificate signing command with Default profile"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - |
         rm -rf $TEST_OUTPUT_DIR
         mkdir -p $TEST_OUTPUT_DIR
-        RESPONSE=$(./bin/{{.CLI_NAME}} --profile=Default sign \
+        RESPONSE=$(./bin/{{.APP_NAME}} --profile=Default sign \
                     --csr=$TEST_CSR_DIR/csr-nist-secp256r1.csr \
                     --caCert=$TEST_CA_DIR/cert-test-CA-nist-secp384r1.pem \
                     --caKey=$TEST_CA_DIR/test-CA-nist-secp384r1.pem)
