@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
@@ -36,6 +37,11 @@ func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
 	payload := cryptobrokerclientgo.HashDataPayload{
 		Profile: "Default",
 		Input:   []byte("Hello world"),
+		Metadata: &cryptobrokerclientgo.Metadata{
+			TraceContext: &cryptobrokerclientgo.TraceContext{
+				CorrelationId: uuid.New().String(),
+			},
+		},
 	}
 	for b.Loop() {
 		err := hashCmd.hashBytes(ctx, payload)
@@ -73,6 +79,11 @@ func BenchmarkHash_profile_Default_Parallel(b *testing.B) {
 		payload := cryptobrokerclientgo.HashDataPayload{
 			Profile: "Default",
 			Input:   []byte("Hello world"),
+			Metadata: &cryptobrokerclientgo.Metadata{
+				TraceContext: &cryptobrokerclientgo.TraceContext{
+					CorrelationId: uuid.New().String(),
+				},
+			},
 		}
 
 		for p.Next() {

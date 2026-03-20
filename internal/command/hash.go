@@ -84,11 +84,17 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, 
 // Internally method measures execution time and prints it through logger.
 func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	correlationId := ""
+	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
+		correlationId = payload.Metadata.TraceContext.CorrelationId
+	}
+
 	ctx, span := tracer.Start(ctx, "CLI.Hash",
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("Hash"),
 			otel.AttributeCryptoProfile.String(payload.Profile),
 			otel.AttributeCryptoInputSize.Int(len(payload.Input)),
+			otel.AttributeCorrelationId.String(correlationId),
 		))
 	defer span.End()
 
@@ -101,12 +107,12 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 		}
 	}
 	payload.Metadata.TraceContext = &cryptobrokerclientgo.TraceContext{
-		TraceId:    spanContext.TraceID().String(),
-		SpanId:     spanContext.SpanID().String(),
-		TraceFlags: spanContext.TraceFlags().String(),
-		TraceState: spanContext.TraceState().String(),
+		TraceId:       spanContext.TraceID().String(),
+		SpanId:        spanContext.SpanID().String(),
+		TraceFlags:    spanContext.TraceFlags().String(),
+		TraceState:    spanContext.TraceState().String(),
+		CorrelationId: correlationId,
 	}
-
 	timestampHashingStart := time.Now()
 	responseBody, err := command.cryptoBrokerLibrary.HashData(ctx, payload)
 	if err != nil {

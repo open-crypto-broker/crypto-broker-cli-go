@@ -80,9 +80,15 @@ func (command *FakeEndpoint) Run(ctx context.Context, flagLoop int) error {
 // Internally method measures execution time and prints it through logger.
 func (command *FakeEndpoint) callFakeEndpoint(ctx context.Context, payload cryptobrokerclientgo.FakeEndpointPayload) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	correlationId := ""
+	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
+		correlationId = payload.Metadata.TraceContext.CorrelationId
+	}
+
 	ctx, span := tracer.Start(ctx, "CLI.FakeEndpoint",
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("FakeEndpoint"),
+			otel.AttributeCorrelationId.String(correlationId),
 		))
 	defer span.End()
 
@@ -94,10 +100,11 @@ func (command *FakeEndpoint) callFakeEndpoint(ctx context.Context, payload crypt
 		}
 	}
 	payload.Metadata.TraceContext = &cryptobrokerclientgo.TraceContext{
-		TraceId:    spanContext.TraceID().String(),
-		SpanId:     spanContext.SpanID().String(),
-		TraceFlags: spanContext.TraceFlags().String(),
-		TraceState: spanContext.TraceState().String(),
+		TraceId:       spanContext.TraceID().String(),
+		SpanId:        spanContext.SpanID().String(),
+		TraceFlags:    spanContext.TraceFlags().String(),
+		TraceState:    spanContext.TraceState().String(),
+		CorrelationId: correlationId,
 	}
 
 	timestampFakeEndpointStart := time.Now()
