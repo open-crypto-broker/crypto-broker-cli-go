@@ -22,6 +22,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20260309133429-233bc4fa0bcf h1:A4VtW334mRiwH4056oGI+ehlxQmipgxkf4zXEKB4akU=
 github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20260309133429-233bc4fa0bcf/go.mod h1:ylqMCyA3Tb9V9d3nmcB1nuHitc/G0dgSnQr+Iga8PIk=
+github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20260319090724-b5cef579e28c h1:9ZE9M+7OnAZLgB7PUrOB4TifC0Xt7+BX9iQAqXZiVKo=
+github.com/open-crypto-broker/crypto-broker-client-go v0.1.1-0.20260319090724-b5cef579e28c/go.mod h1:N01FHumOy41MGXhth5oIPXoEKSaBYJ9o9ONAqGiD4w0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
