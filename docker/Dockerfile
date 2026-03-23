@@ -1,5 +1,11 @@
+## This Dockerfile builds the Crypto Broker CLI Go test application
+## This is a simple CLI application that can be used to test the Crypto Broker Server. It is not intended for production use.
+
+ARG GO_VERSION=1.26
+ARG ALPINE_VERSION=3.23
+
 ## Build stage
-FROM golang:alpine AS build
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS build
 
 WORKDIR /app
 
@@ -10,10 +16,10 @@ RUN  go mod download
 
 COPY . .
 
-RUN go build -o bin/go-client-cli main.go
+RUN CGO_ENABLED=0 go build -o bin/go-client-cli main.go
 
 ## Deploy stage
-FROM alpine
+FROM scratch
 
 WORKDIR /app
 
