@@ -102,6 +102,10 @@ func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, fileP
 
 func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokerclientgo.SignCertificatePayload, flagEncoding string) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	correlationId := ""
+	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
+		correlationId = payload.Metadata.TraceContext.CorrelationId
+	}
 	ctx, span := tracer.Start(ctx, "CLI.Sign",
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("Sign"),
@@ -109,6 +113,7 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 			otel.AttributeCryptoCsrSize.Int(len(payload.CSR)),
 			otel.AttributeCryptoCaCertSize.Int(len(payload.CACert)),
 			otel.AttributeCryptoCaKeySize.Int(len(payload.CAPrivateKey)),
+			otel.AttributeCorrelationId.String(correlationId),
 		))
 	defer span.End()
 
@@ -121,10 +126,11 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 		}
 	}
 	payload.Metadata.TraceContext = &cryptobrokerclientgo.TraceContext{
-		TraceId:    spanContext.TraceID().String(),
-		SpanId:     spanContext.SpanID().String(),
-		TraceFlags: spanContext.TraceFlags().String(),
-		TraceState: spanContext.TraceState().String(),
+		TraceId:       spanContext.TraceID().String(),
+		SpanId:        spanContext.SpanID().String(),
+		TraceFlags:    spanContext.TraceFlags().String(),
+		TraceState:    spanContext.TraceState().String(),
+		CorrelationId: correlationId,
 	}
 
 	timestampSignStart := time.Now()

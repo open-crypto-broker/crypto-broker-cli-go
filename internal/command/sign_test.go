@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
@@ -33,6 +34,11 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential(b *testin
 	}
 
 	payload := cryptobrokerclientgo.SignCertificatePayload{
+		Metadata: &cryptobrokerclientgo.Metadata{
+			TraceContext: &cryptobrokerclientgo.TraceContext{
+				CorrelationId: uuid.New().String(),
+			},
+		},
 		Profile: "Default",
 		CSR: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIBXzCCAQUCAQAwgaIxCzAJBgNVBAYTAkRFMREwDwYDVQQKDAhUZXN0IE9yZzEl
@@ -104,6 +110,11 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(b *testing.
 		}
 
 		payload := cryptobrokerclientgo.SignCertificatePayload{
+			Metadata: &cryptobrokerclientgo.Metadata{
+				TraceContext: &cryptobrokerclientgo.TraceContext{
+					CorrelationId: uuid.New().String(),
+				},
+			},
 			Profile: "Default",
 			CSR: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIBXzCCAQUCAQAwgaIxCzAJBgNVBAYTAkRFMREwDwYDVQQKDAhUZXN0IE9yZzEl
@@ -173,6 +184,11 @@ func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential(b *test
 	}
 
 	payload := cryptobrokerclientgo.SignCertificatePayload{
+		Metadata: &cryptobrokerclientgo.Metadata{
+			TraceContext: &cryptobrokerclientgo.TraceContext{
+				CorrelationId: uuid.New().String(),
+			},
+		},
 		Profile: "Default",
 		CSR: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIB5zCCAUgCAQAwgaIxCzAJBgNVBAYTAkRFMREwDwYDVQQKDAhUZXN0IE9yZzEl
@@ -247,6 +263,11 @@ func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testin
 		}
 
 		payload := cryptobrokerclientgo.SignCertificatePayload{
+			Metadata: &cryptobrokerclientgo.Metadata{
+				TraceContext: &cryptobrokerclientgo.TraceContext{
+					CorrelationId: uuid.New().String(),
+				},
+			},
 			Profile: "Default",
 			CSR: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIB5zCCAUgCAQAwgaIxCzAJBgNVBAYTAkRFMREwDwYDVQQKDAhUZXN0IE9yZzEl
@@ -319,6 +340,11 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential(b *test
 	}
 
 	payload := cryptobrokerclientgo.SignCertificatePayload{
+		Metadata: &cryptobrokerclientgo.Metadata{
+			TraceContext: &cryptobrokerclientgo.TraceContext{
+				CorrelationId: uuid.New().String(),
+			},
+		},
 		Profile: "Default",
 		CSR: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIBXzCCAQUCAQAwgaIxCzAJBgNVBAYTAkRFMREwDwYDVQQKDAhUZXN0IE9yZzEl
@@ -388,6 +414,11 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testin
 		}
 
 		payload := cryptobrokerclientgo.SignCertificatePayload{
+			Metadata: &cryptobrokerclientgo.Metadata{
+				TraceContext: &cryptobrokerclientgo.TraceContext{
+					CorrelationId: uuid.New().String(),
+				},
+			},
 			Profile: "Default",
 			CSR: []byte(`-----BEGIN CERTIFICATE REQUEST-----
 MIIBXzCCAQUCAQAwgaIxCzAJBgNVBAYTAkRFMREwDwYDVQQKDAhUZXN0IE9yZzEl
