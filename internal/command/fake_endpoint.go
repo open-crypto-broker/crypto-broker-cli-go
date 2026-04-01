@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -117,16 +116,10 @@ func (command *FakeEndpoint) callFakeEndpoint(ctx context.Context, payload crypt
 
 	timestampFakeEndpointFinish := time.Now()
 	durationElapsedFakeEndpoint := timestampFakeEndpointFinish.Sub(timestampFakeEndpointStart)
-	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return err
-	}
 
 	span.SetStatus(codes.Ok, "Fake endpoint operation completed successfully")
 
-	command.logger.Info("Fake endpoint response", "response", string(marshalledResp))
+	command.logger.Info("Fake endpoint response", "response", responseBody)
 	command.logger.Info("Fake endpoint call took", "duration_microseconds", float64(durationElapsedFakeEndpoint.Nanoseconds())/1000.0)
 
 	return nil

@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -123,12 +122,6 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 
 	timestampHashingFinish := time.Now()
 	durationElapsedHashing := timestampHashingFinish.Sub(timestampHashingStart)
-	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return err
-	}
 
 	span.SetAttributes(
 		otel.AttributeCryptoHashAlgorithm.String(responseBody.HashAlgorithm),
@@ -136,7 +129,7 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 	)
 	span.SetStatus(codes.Ok, "Hash operation completed successfully")
 
-	command.logger.Info("Hashed response", "response", string(marshalledResp))
+	command.logger.Info("Hashed response", "response", responseBody)
 	command.logger.Info(
 		fmt.Sprintf("Data Hashing took %d µs", durationElapsedHashing.Microseconds()),
 	)
