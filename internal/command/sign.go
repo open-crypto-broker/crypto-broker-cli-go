@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -148,17 +147,11 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 
 	timestampSignFinish := time.Now()
 	durationElapsedSign := timestampSignFinish.Sub(timestampSignStart)
-	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return err
-	}
 
 	span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.SignedCertificate)))
 	span.SetStatus(codes.Ok, "Certificate signing completed successfully")
 
-	command.logger.Info("Sign Response", "response", string(marshalledResp))
+	command.logger.Info("Sign response", "response", responseBody)
 	command.logger.Info(
 		fmt.Sprintf("Certificate Signing took %d µs", durationElapsedSign.Microseconds()),
 	)

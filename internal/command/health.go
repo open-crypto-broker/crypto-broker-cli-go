@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -82,17 +81,10 @@ func (command *Health) checkHealth(ctx context.Context) error {
 	responseBody := command.cryptoBrokerLibrary.HealthData(ctx)
 	timestampFinish := time.Now()
 	durationElapsed := timestampFinish.Sub(timestampStart)
-	marshalledResp, err := json.MarshalIndent(responseBody, " ", "  ")
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return err
-	}
 
 	span.SetStatus(codes.Ok, "Health check completed successfully")
 
-	command.logger.Info("Health check response", "response", string(marshalledResp))
-	command.logger.Info(fmt.Sprintf("Health check Status: %s", responseBody.Status))
+	command.logger.Info("Health check response", "response", responseBody)
 	command.logger.Info("Health check took", "duration_microseconds", float64(durationElapsed.Nanoseconds())/1000.0)
 
 	return nil
