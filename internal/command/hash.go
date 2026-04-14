@@ -38,7 +38,7 @@ func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slo
 
 // Run executes command logic.
 func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, flagLoop int) error {
-	defer command.gracefulShutdown()
+	defer func() { _ = command.gracefulShutdown() }()
 
 	payload := cryptobrokerclientgo.HashDataPayload{
 		Input:    input,
