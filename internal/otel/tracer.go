@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
@@ -32,11 +31,6 @@ func GetGlobalTracer() trace.Tracer {
 
 // NewTracerProvider creates and initializes a new OpenTelemetry tracer provider
 func NewTracerProvider(ctx context.Context, logger *slog.Logger) (*TracerProvider, error) {
-	tracesExporter := os.Getenv(env.OTEL_TRACES_EXPORTER)
-	if tracesExporter == "" {
-		tracesExporter = defaultTracesExporter
-	}
-
 	exporterNames := strings.Split(strings.ToLower(tracesExporter), ",")
 	for i, name := range exporterNames {
 		exporterNames[i] = strings.TrimSpace(name)
@@ -199,8 +193,7 @@ func getBatchersConsole(logger *slog.Logger) ([]sdktrace.TracerProviderOption, e
 
 // defineSampler defines the sampler for the tracer provider
 func defineSampler(logger *slog.Logger) sdktrace.Sampler {
-	sampler := sdktrace.AlwaysSample()
-
+	var sampler sdktrace.Sampler 
 	switch samplerName {
 	case samplerAlwaysOn, samplerAlways:
 		sampler = sdktrace.AlwaysSample()

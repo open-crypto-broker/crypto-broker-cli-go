@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"errors"
 	"time"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/clog"
@@ -26,9 +27,14 @@ func init() {
 	signCmd.Flags().StringVarP(&flags.FilePathCACert, constant.KeywordFlagFilePathCACert, "", "", "Specify relative path to CA certificate file")
 	signCmd.Flags().StringVarP(&flags.FilePathSigningKey, constant.KeywordFlagFilePathSigningKey, "", "", "Specify relative path to signing key file")
 
-	signCmd.MarkFlagRequired(constant.KeywordFlagFilePathCSR)
-	signCmd.MarkFlagRequired(constant.KeywordFlagFilePathCACert)
-	signCmd.MarkFlagRequired(constant.KeywordFlagFilePathSigningKey)
+	var err error
+	err = errors.Join(err, signCmd.MarkFlagRequired(constant.KeywordFlagFilePathCSR))
+	err = errors.Join(err, signCmd.MarkFlagRequired(constant.KeywordFlagFilePathCACert))
+	err = errors.Join(err, signCmd.MarkFlagRequired(constant.KeywordFlagFilePathSigningKey))
+	if err != nil {
+		panic(err)
+	}
+
 	signCmd.MarkFlagsRequiredTogether(constant.KeywordFlagFilePathCSR, constant.KeywordFlagFilePathCACert, constant.KeywordFlagFilePathSigningKey)
 }
 

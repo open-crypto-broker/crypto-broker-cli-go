@@ -36,7 +36,7 @@ func NewSign(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slo
 
 // Run executes command logic.
 func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, filePathSigningKey, flagProfile, flagEncoding, flagSubject string, flagLoop int) error {
-	defer command.gracefulShutdown()
+	defer func() { _ = command.gracefulShutdown() }()
 
 	rawContentCSR, err := command.readFileBytes(filePathCSR)
 	if err != nil {
@@ -172,7 +172,7 @@ func (command *Sign) readFileBytes(filePath string) ([]byte, error) {
 		return nil, fmt.Errorf("could not open %s file, err: %w", filePath, err)
 	}
 
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	rawContent, err := io.ReadAll(f)
 	if err != nil {

@@ -36,7 +36,7 @@ func NewFakeEndpoint(ctx context.Context, lib *cryptobrokerclientgo.Library, log
 
 // Run executes command logic.
 func (command *FakeEndpoint) Run(ctx context.Context, flagLoop int) error {
-	defer command.gracefulShutdown()
+	defer func() { _ = command.gracefulShutdown() }()
 
 	payload := cryptobrokerclientgo.FakeEndpointPayload{
 		Metadata: nil,
