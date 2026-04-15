@@ -36,7 +36,7 @@ func NewBenchmark(ctx context.Context, lib *cryptobrokerclientgo.Library, logger
 
 // Run executes command logic.
 func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
-	defer command.gracefulShutdown()
+	defer func() { _ = command.gracefulShutdown() }()
 
 	command.logger.Info("Running server-side benchmarks")
 

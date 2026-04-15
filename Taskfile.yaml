@@ -48,6 +48,11 @@ tasks:
     cmds:
       - brew install govulncheck
 
+  install-golangci-lint:
+    desc: "Install golangci-lint"
+    cmds:
+      - curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.11.4
+
   ################# Build Go CLI ####################
   build:
     desc: "Build CLI"
@@ -167,11 +172,18 @@ tasks:
     cmds:
       - govulncheck ./...
 
+  golangci-lint:
+    desc: "Run golangci-lint"
+    deps: [install-golangci-lint]
+    cmds:
+      - golangci-lint run ./...
+
   ci:
     desc: "Runs continuous integration checks on source code"
     cmds:
       - task: check-dependencies
       - task: format
       - task: lint
+      - task: golangci-lint
       - task: unit-test
       - task: vulnerability-check

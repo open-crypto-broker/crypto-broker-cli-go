@@ -34,7 +34,7 @@ func NewHealth(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *s
 
 // Run executes command logic.
 func (command *Health) Run(ctx context.Context, flagLoop int) error {
-	defer command.gracefulShutdown()
+	defer func() { _ = command.gracefulShutdown() }()
 
 	command.logger.Info("Checking broker server health")
 
