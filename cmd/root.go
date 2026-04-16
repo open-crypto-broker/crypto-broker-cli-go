@@ -10,6 +10,7 @@ func init() {
 	rootCmd.AddCommand(healthCmd)
 	rootCmd.AddCommand(benchmarkCmd)
 	rootCmd.AddCommand(fakeEndpointCmd)
+	rootCmd.AddCommand(versionCmd)
 }
 
 var rootCmd = &cobra.Command{

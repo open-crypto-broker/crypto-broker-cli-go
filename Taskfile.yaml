@@ -3,6 +3,10 @@ version: '3'
 dotenv: ['.env']
 
 vars:
+  CB_GIT_SHA:
+    sh: git rev-parse HEAD
+  CB_GIT_TAG:
+    sh: git tag --sort=-creatordate | head -n 1
   # GNU grep support depending on OS
   GREP_CMD:
     sh: |
@@ -60,7 +64,8 @@ tasks:
     vars:
       APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
-      - go build -o ./bin/{{.APP_NAME}} main.go
+      - 'echo "Building {{.APP_NAME}} with Git SHA: {{.CB_GIT_SHA}} and Git Tag: {{.CB_GIT_TAG}}"'
+      - go build -o ./bin/{{.APP_NAME}} -ldflags="-X github.com/open-crypto-broker/crypto-broker-cli-go/cmd.gitSHA={{.CB_GIT_SHA}} -X github.com/open-crypto-broker/crypto-broker-cli-go/cmd.gitTag={{.CB_GIT_TAG}}" main.go
     sources:
       - main.go
       - internal/**/*.go

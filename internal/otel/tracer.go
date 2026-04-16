@@ -193,7 +193,7 @@ func getBatchersConsole(logger *slog.Logger) ([]sdktrace.TracerProviderOption, e
 
 // defineSampler defines the sampler for the tracer provider
 func defineSampler(logger *slog.Logger) sdktrace.Sampler {
-	var sampler sdktrace.Sampler 
+	var sampler sdktrace.Sampler
 	switch samplerName {
 	case samplerAlwaysOn, samplerAlways:
 		sampler = sdktrace.AlwaysSample()
