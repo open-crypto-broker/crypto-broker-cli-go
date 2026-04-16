@@ -69,6 +69,10 @@ func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, fileP
 		Metadata:     nil, // Will be set in signCertificate with trace context
 	}
 
+	command.logger.Info(
+		fmt.Sprintf("Signing certificate using %s profile", flagProfile),
+	)
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
