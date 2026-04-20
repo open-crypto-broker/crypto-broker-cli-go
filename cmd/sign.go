@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
-	"errors"
 	"time"
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/clog"
