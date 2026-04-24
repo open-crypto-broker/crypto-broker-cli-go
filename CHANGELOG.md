@@ -3,6 +3,12 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.2.2] - 2026-04-24
+
+### 🐛 Bug Fixes
+
+- Adjust docker release permission (#49)
+
 ## [0.2.1] - 2026-04-24
 
 ### 🚀 Features
