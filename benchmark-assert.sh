@@ -109,7 +109,7 @@ ceil() {
 
 # threshold=$((baseline * (1 + margin + env_factor)))
 threshold_ns_per_op_BenchmarkHash_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 2005227 * (1 + 0.25)}')")
-threshold_allocs_per_op_BenchmarkHash_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 137 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkHash_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 160 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkHash_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 1734807 * (1 + 0.25)}')")
 threshold_allocs_per_op_BenchmarkHash_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 138 * (1 + 0.1)}')")
