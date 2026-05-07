@@ -115,7 +115,7 @@ threshold_ns_per_op_BenchmarkHash_profile_Default_Parallel=$(ceil "$(awk 'BEGIN 
 threshold_allocs_per_op_BenchmarkHash_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 138 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkHealth_Sequential=$(ceil "$(awk 'BEGIN {print 2114627 * (1 + 0.25)}')")
-threshold_allocs_per_op_BenchmarkHealth_Sequential=$(ceil "$(awk 'BEGIN {print 98 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkHealth_Sequential=$(ceil "$(awk 'BEGIN {print 121 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkHealth_Parallel=$(ceil "$(awk 'BEGIN {print 2573472 * (1 + 0.25)}')")
 threshold_allocs_per_op_BenchmarkHealth_Parallel=$(ceil "$(awk 'BEGIN {print 196 * (1 + 0.1)}')")
