@@ -46,6 +46,7 @@ jobs:
           SERVER_PID=$!
           cd ..
           task run-benchmarks
+          go test -run=^$ -bench='Benchmark' -benchmem -json ./... > benchmark-results.json
           kill $SERVER_PID
 
       - name: Run benchmarks with FIPS mode enabled
@@ -59,6 +60,12 @@ jobs:
           cd ..
           task run-benchmarks
           kill $SERVER_PID
+
+      - name: Assert benchmark performance
+        continue-on-error: false
+        run: |
+          chmod +x benchmark-assert.sh
+          ./benchmark-assert.sh benchmark-results.json
 
       - name: Run CI task from Taskfile
         run: task ci

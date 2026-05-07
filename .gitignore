@@ -38,3 +38,5 @@ bin/**
 
 # ignore temporary test folder
 tmp-tests/
+
+benchmark-results.json
