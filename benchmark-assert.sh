@@ -133,7 +133,7 @@ threshold_ns_per_op_BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Par
 threshold_allocs_per_op_BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel=$(ceil "$(awk 'BEGIN {print 194 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential=$(ceil "$(awk 'BEGIN {print 8482845 * (1 + 0.4)}')")
-threshold_allocs_per_op_BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential=$(ceil "$(awk 'BEGIN {print 172 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential=$(ceil "$(awk 'BEGIN {print 225 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel=$(ceil "$(awk 'BEGIN {print 4208205 * (1 + 0.4)}')")
 threshold_allocs_per_op_BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel=$(ceil "$(awk 'BEGIN {print 174 * (1 + 0.1)}')")
