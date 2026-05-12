@@ -5,12 +5,17 @@ on:
     branches: [ main ]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions: {}
 
 jobs:
   go-pipeline:
+    name: Go CI Pipeline
     permissions:
-      contents: read
+      contents: read # for checking out code and submodules
     runs-on: ubuntu-latest
 
     steps:
