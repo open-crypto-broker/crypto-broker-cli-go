@@ -150,6 +150,16 @@ tasks:
     cmds:
       - go test ./... -benchmem -run=^$ -bench ^Benchmark
 
+  assert-benchmarks:
+    desc: "Run benchmarks with performance assertions"
+    # deps:  [build]
+    cmds:
+      - echo "Running benchmarks with JSON output..."
+      - go test ./... -run=^$ -bench=. -benchmem -count=1 -json 2>&1 | tee benchmark-results.json || echo "Benchmarks completed with failures, proceeding with assertions..."
+      - echo "Running benchmark performance assertions..."
+      - chmod +x benchmark-assert.sh
+      - ./benchmark-assert.sh benchmark-results.json
+
   ################# Continuous Improvement Tasks ####################
   check-dependencies:
     desc: "Set the dependencies"
