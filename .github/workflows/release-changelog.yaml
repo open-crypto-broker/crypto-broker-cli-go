@@ -38,8 +38,7 @@ jobs:
 
       - name: Use git-cliff for changelog generation, create git tag, push to repo
         uses: open-crypto-broker/.github/actions/git-cliff@main # nolint # zizmor: ignore[unpinned-uses]
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         with:
           ref_name: ${{ github.ref_name }}
           version: ${{ github.event.inputs.version }}
+          token: ${{ steps.app-token.outputs.token }}
