@@ -3,6 +3,21 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.2.3] - 2026-05-13
+
+### 🚀 Features
+
+- Implemented benchmark assertions (#51)
+- Add dependabot config (#50)
+
+### 🐛 Bug Fixes
+
+- Pass token as input for changelog generation (#54)
+
+### 🚜 Refactor
+
+- Adjust workflow files (#53)
+
 ## [0.2.2] - 2026-04-24
 
 ### 🐛 Bug Fixes
