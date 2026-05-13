@@ -10,4 +10,6 @@ permissions: {}
 jobs:
   lint:
     name: Markdownlint
+    permissions:
+      contents: read # for checking out code
     uses: open-crypto-broker/.github/.github/workflows/markdownlint.yaml@main # nolint # zizmor: ignore[unpinned-uses]
