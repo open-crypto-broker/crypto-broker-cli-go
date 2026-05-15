@@ -16,6 +16,8 @@ permissions: {}
 jobs:
   check:
     name: Version Sync Check
+    permissions:
+      contents: read # required for checkout
     uses: open-crypto-broker/.github/.github/workflows/version-sync-check.yaml@main # nolint # zizmor: ignore[unpinned-uses]
     with:
       language: go
