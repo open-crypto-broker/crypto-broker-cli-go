@@ -12,6 +12,14 @@ concurrency:
 permissions: {}
 
 jobs:
+  license-check:
+    name: License Compliance
+    permissions:
+      contents: read # for checking out code
+    uses: open-crypto-broker/.github/.github/workflows/license-compliance.yaml@main # nolint # zizmor: ignore[unpinned-uses]
+    with:
+      directory_to_scan: '.'
+
   go-pipeline:
     name: Go CI Pipeline
     permissions:
