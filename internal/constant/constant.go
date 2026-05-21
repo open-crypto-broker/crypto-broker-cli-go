@@ -23,3 +23,5 @@ const (
 	MaxLoopFlagValue = 1000
 	NoLoopFlagValue  = -1000001
 )
+
+const ClientGoModulePath = "github.com/open-crypto-broker/crypto-broker-client-go"
