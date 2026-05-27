@@ -83,8 +83,7 @@ func (command *Benchmark) runBenchmark(ctx context.Context) error {
 	spanContext := span.SpanContext()
 	payload := cryptobrokerclientgo.BenchmarkDataPayload{
 		Metadata: &cryptobrokerclientgo.Metadata{
-			Id:        uuid.New().String(),
-			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+			Id: uuid.New().String(),
 			TraceContext: &cryptobrokerclientgo.TraceContext{
 				TraceId:    spanContext.TraceID().String(),
 				SpanId:     spanContext.SpanID().String(),

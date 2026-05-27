@@ -124,8 +124,7 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 	spanContext := span.SpanContext()
 	if payload.Metadata == nil {
 		payload.Metadata = &cryptobrokerclientgo.Metadata{
-			Id:        uuid.New().String(),
-			CreatedAt: time.Now().UTC().Format(time.RFC3339),
+			Id: uuid.New().String(),
 		}
 	}
 	payload.Metadata.TraceContext = &cryptobrokerclientgo.TraceContext{
