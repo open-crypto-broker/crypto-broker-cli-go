@@ -3,6 +3,20 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.3.0] - 2026-06-08
+
+### 🚀 Features
+
+- Update golang version from 1.26.3 to 1.26.4 (#61)
+- Updated crypto-broker-client-go lib to latest, updated code accordingly (#60)
+- Add license check (#57)
+- Updated version command (#58)
+- Add version sync check workflow (#56)
+
+### ⚙️ Miscellaneous Tasks
+
+- Change input name due to upstream change (#55)
+
 ## [0.2.3] - 2026-05-13
 
 ### 🚀 Features
