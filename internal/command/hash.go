@@ -130,7 +130,7 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 
 	hashOutputFormat := "hex"
 	if responseBody.GetHashValueRaw() != nil {
-		hashOutputFormat = "raw_digest_bytes"
+		hashOutputFormat = "raw"
 	}
 
 	span.SetAttributes(
