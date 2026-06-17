@@ -37,13 +37,19 @@ func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slo
 }
 
 // Run executes command logic.
-func (command *Hash) Run(ctx context.Context, input []byte, flagProfile string, flagLoop int) error {
+func (command *Hash) Run(ctx context.Context, input []byte, flagOutputFormat string, flagProfile string, flagLoop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
 
 	payload := cryptobrokerclientgo.HashDataPayload{
 		Input:    input,
 		Profile:  flagProfile,
 		Metadata: nil, // Will be set in hashBytes with trace context
+	}
+
+	if flagOutputFormat == "raw" {
+		payload.OutputFormat = cryptobrokerclientgo.OutputFormatRaw
+	} else {
+		payload.OutputFormat = cryptobrokerclientgo.OutputFormatHex
 	}
 
 	command.logger.Info("Hashing input", "input", string(input), "profile", flagProfile)
@@ -122,9 +128,15 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 	timestampHashingFinish := time.Now()
 	durationElapsedHashing := timestampHashingFinish.Sub(timestampHashingStart)
 
+	hashOutputFormat := "hex"
+	if responseBody.GetHashValueRaw() != nil {
+		hashOutputFormat = "raw_digest_bytes"
+	}
+
 	span.SetAttributes(
 		otel.AttributeCryptoHashAlgorithm.String(responseBody.HashAlgorithm),
-		otel.AttributeCryptoHashOutputSize.Int(len(responseBody.HashValue)),
+		otel.AttributeCryptoHashOutputSize.Int(len(responseBody.GetHashValueHex())/2+len(responseBody.GetHashValueRaw())),
+		otel.AttributeCryptoHashOutputFormat.String(hashOutputFormat),
 	)
 	span.SetStatus(codes.Ok, "Hash operation completed successfully")
 

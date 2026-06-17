@@ -17,6 +17,7 @@ import (
 
 func init() {
 	hashCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
+	hashCmd.Flags().StringVarP(&flags.OutputFormat, constant.KeywordFlagOutputFormat, "", "hex", "Specify hash output format: hex or raw")
 	hashCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
 		fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 }
@@ -65,7 +66,7 @@ var hashCmd = &cobra.Command{
 			panic(err)
 		}
 
-		if err := hashCommand.Run(ctx, []byte(args[0]), flags.Profile, flags.Loop); err != nil {
+		if err := hashCommand.Run(ctx, []byte(args[0]), flags.OutputFormat, flags.Profile, flags.Loop); err != nil {
 			shutdownTracer()
 			logger.Error("Failed to run hash command", "error", err)
 			panic(err)

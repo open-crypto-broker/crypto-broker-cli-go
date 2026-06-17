@@ -4,6 +4,7 @@ package flags
 var (
 	Loop               int
 	Profile            string
+	OutputFormat       string
 	Encoding           string
 	Subject            string
 	FilePathCSR        string
