@@ -4,6 +4,7 @@ package constant
 const (
 	KeywordFlagProfile            = "profile"
 	KeywordFlagLoop               = "loop"
+	KeywordFlagOutputFormat       = "output-format"
 	KeywordFlagEncoding           = "encoding"
 	KeywordFlagSubject            = "subject"
 	KeywordFlagFilePathCSR        = "csr"

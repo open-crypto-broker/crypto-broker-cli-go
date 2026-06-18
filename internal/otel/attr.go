@@ -8,6 +8,7 @@ var (
 	AttributeCryptoInputSize            = attribute.Key("crypto.input_size")
 	AttributeCryptoHashAlgorithm        = attribute.Key("crypto.hash_algorithm")
 	AttributeCryptoHashOutputSize       = attribute.Key("crypto.hash_output_size")
+	AttributeCryptoHashOutputFormat     = attribute.Key("crypto.hash_output_format")
 	AttributeCryptoSignedCertSize       = attribute.Key("crypto.signed_cert_size")
 	AttributeCryptoBenchmarkResultsSize = attribute.Key("crypto.benchmark_results_size")
 	AttributeCryptoCsrSize              = attribute.Key("crypto.csr_size")
