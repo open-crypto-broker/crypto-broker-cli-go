@@ -47,9 +47,9 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagOutputFormat str
 	}
 
 	if flagOutputFormat == "raw" {
-		payload.OutputFormat = cryptobrokerclientgo.OutputFormatRaw
+		payload.OutputFormatHash = cryptobrokerclientgo.OutputFormatRaw
 	} else {
-		payload.OutputFormat = cryptobrokerclientgo.OutputFormatHex
+		payload.OutputFormatHash = cryptobrokerclientgo.OutputFormatHex
 	}
 
 	command.logger.Info("Hashing input", "input", string(input), "profile", flagProfile)
