@@ -21,8 +21,8 @@ func ValidateFlagLoop(val int) error {
 
 // ValidateFlagEncoding validates encoding flag value.
 func ValidateFlagEncoding(val string) error {
-	if val != constant.EncodingPEM && val != constant.EncodingB64 {
-		return fmt.Errorf("'encoding' flag value must be %s or %s", constant.EncodingPEM, constant.EncodingB64)
+	if val != constant.EncodingPEM && val != constant.EncodingDER {
+		return fmt.Errorf("'encoding' flag value must be %s or %s", constant.EncodingPEM, constant.EncodingDER)
 	}
 
 	return nil

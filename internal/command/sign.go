@@ -136,12 +136,12 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 	}
 
 	timestampSignStart := time.Now()
-	encodingOpt := cryptobrokerclientgo.WithPEMEncoding()
-	if strings.ToLower(flagEncoding) == constant.EncodingB64 {
-		encodingOpt = cryptobrokerclientgo.WithBase64Encoding()
+	payload.OutputFormat = cryptobrokerclientgo.OutputFormatPem // default output format
+	if strings.ToLower(flagEncoding) == constant.EncodingDER {
+		payload.OutputFormat = cryptobrokerclientgo.OutputFormatDer
 	}
 
-	responseBody, err := command.cryptoBrokerLibrary.SignCertificate(ctx, payload, encodingOpt)
+	responseBody, err := command.cryptoBrokerLibrary.SignCertificate(ctx, payload)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -151,7 +151,7 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 	timestampSignFinish := time.Now()
 	durationElapsedSign := timestampSignFinish.Sub(timestampSignStart)
 
-	span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.SignedCertificate)))
+	span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.GetDer()) + len(responseBody.GetPem())))
 	span.SetStatus(codes.Ok, "Certificate signing completed successfully")
 
 	command.logger.Info("Sign response", "response", responseBody)

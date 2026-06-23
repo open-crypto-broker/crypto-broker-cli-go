@@ -15,7 +15,7 @@ const (
 // constants that represents supported encodings.
 const (
 	EncodingPEM = "pem"
-	EncodingB64 = "b64"
+	EncodingDER = "der"
 )
 
 // constants that represents supported loop flag values.
