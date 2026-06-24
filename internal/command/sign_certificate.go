@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -142,22 +143,24 @@ func (command *SignCertificate) signCertificate(ctx context.Context, payload cry
 	}
 
 	responseBody, err := command.cryptoBrokerLibrary.SignCertificate(ctx, payload)
-	if err != nil {
+	if err != nil && !errors.Is(err, cryptobrokerclientgo.ErrCircuitOpen) {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return fmt.Errorf("failed to obtain signed certificate through CryptoBroker library, err: %w", err)
 	}
 
-	timestampSignCertificateFinish := time.Now()
-	durationElapsedSignCertificate := timestampSignCertificateFinish.Sub(timestampSignCertificateStart)
+	if responseBody != nil {
+		timestampSignCertificateFinish := time.Now()
+		durationElapsedSignCertificate := timestampSignCertificateFinish.Sub(timestampSignCertificateStart)
 
-	span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.GetDer()) + len(responseBody.GetPem())))
-	span.SetStatus(codes.Ok, "Certificate signing completed successfully")
+		span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.GetDer()) + len(responseBody.GetPem())))
+		span.SetStatus(codes.Ok, "Certificate signing completed successfully")
 
-	command.logger.Info("Sign certificate response", "response", responseBody)
-	command.logger.Info(
-		fmt.Sprintf("Certificate Signing took %d µs", durationElapsedSignCertificate.Microseconds()),
-	)
+		command.logger.Info("Sign certificate response", "response", responseBody)
+		command.logger.Info(
+			fmt.Sprintf("Certificate Signing took %d µs", durationElapsedSignCertificate.Microseconds()),
+		)
+	}
 
 	return nil
 }

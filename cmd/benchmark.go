@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -11,7 +12,7 @@ import (
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/flags"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
-	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	cryptobroker "github.com/open-crypto-broker/crypto-broker-client-go"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +51,7 @@ var benchmarkCmd = &cobra.Command{
 		}
 		defer shutdownTracer()
 
-		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+		lib, err := cryptobroker.NewLibrary(ctx)
 		if err != nil {
 			shutdownTracer()
 			logger.Error("Failed to initialize library", "error", err)
@@ -64,7 +65,8 @@ var benchmarkCmd = &cobra.Command{
 			panic(err)
 		}
 
-		if err := benchmarkCommand.Run(ctx, flags.Loop); err != nil {
+		err = benchmarkCommand.Run(ctx, flags.Loop)
+		if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
 			shutdownTracer()
 			logger.Error("Failed to run benchmark command", "error", err)
 			panic(err)
