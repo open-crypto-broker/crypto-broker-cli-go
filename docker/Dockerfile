@@ -2,7 +2,7 @@
 ## This is a simple CLI application that can be used to test the Crypto Broker Server. It is not intended for production use.
 
 ARG GO_VERSION=1.26
-ARG ALPINE_VERSION=3.23
+ARG ALPINE_VERSION=3.24
 
 ## Build stage
 FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS build
