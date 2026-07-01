@@ -94,7 +94,7 @@ func TestRunStressHonorsRequestLimit(t *testing.T) {
 		Input:          []byte(defaultStressInput),
 	}
 
-	result := runStress(context.Background(), config, []stressCall{
+	result := runStress(context.Background(), context.Background(), config, []stressCall{
 		func(context.Context) error { return nil },
 		func(context.Context) error { return nil },
 	})
@@ -127,7 +127,7 @@ func TestRunStressRecordsStatusCodes(t *testing.T) {
 		Input:          []byte(defaultStressInput),
 	}
 
-	result := runStress(context.Background(), config, []stressCall{
+	result := runStress(context.Background(), context.Background(), config, []stressCall{
 		func(context.Context) error {
 			return status.Error(codes.ResourceExhausted, "too many streams")
 		},
@@ -147,6 +147,47 @@ func TestRunStressRecordsStatusCodes(t *testing.T) {
 
 	if got := result.StatusCodes[codes.ResourceExhausted]; got != config.Requests {
 		t.Fatalf("StatusCodes[ResourceExhausted] = %d, want %d", got, config.Requests)
+	}
+}
+
+func TestRunStressDurationStopsSchedulingWithoutCancelingInflightRequests(t *testing.T) {
+	config := StressConfig{
+		Connections:    1,
+		Concurrency:    1,
+		Timeout:        time.Second,
+		ConnectTimeout: time.Second,
+		Profile:        defaultStressProfile,
+		Input:          []byte(defaultStressInput),
+	}
+
+	runCtx, cancelRun := context.WithCancel(context.Background())
+	callStarted := make(chan struct{})
+	releaseCall := make(chan struct{})
+
+	var calls int
+	resultCh := make(chan StressResult, 1)
+	go func() {
+		resultCh <- runStress(runCtx, context.Background(), config, []stressCall{
+			func(ctx context.Context) error {
+				calls++
+				close(callStarted)
+				<-releaseCall
+				return ctx.Err()
+			},
+		})
+	}()
+
+	<-callStarted
+	cancelRun()
+	close(releaseCall)
+
+	result := <-resultCh
+	if calls != 1 {
+		t.Fatalf("calls = %d, want 1", calls)
+	}
+
+	if result.StatusCodes[codes.OK] != 1 {
+		t.Fatalf("StatusCodes[OK] = %d, want 1", result.StatusCodes[codes.OK])
 	}
 }
 

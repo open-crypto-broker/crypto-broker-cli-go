@@ -144,9 +144,10 @@ func (command *Stress) Run(ctx context.Context, config StressConfig) error {
 	}
 	defer closeLibraries(command.logger, libraries)
 
+	runCtx := ctx
 	if config.Duration > 0 {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, config.Duration)
+		runCtx, cancel = context.WithTimeout(ctx, config.Duration)
 		defer cancel()
 	}
 
@@ -173,7 +174,7 @@ func (command *Stress) Run(ctx context.Context, config StressConfig) error {
 		"input_size", len(config.Input),
 	)
 
-	result := runStress(ctx, config, calls)
+	result := runStress(runCtx, ctx, config, calls)
 	command.logSummary(config, result)
 
 	return nil
@@ -264,7 +265,7 @@ type StressResult struct {
 	LatencyBuckets [len(latencyBucketBounds) + 1]uint64
 }
 
-func runStress(ctx context.Context, config StressConfig, calls []stressCall) StressResult {
+func runStress(runCtx context.Context, requestParentCtx context.Context, config StressConfig, calls []stressCall) StressResult {
 	results := make(chan stressCallResult, config.Concurrency*2)
 	result := StressResult{
 		StartedAt:   time.Now(),
@@ -281,8 +282,8 @@ func runStress(ctx context.Context, config StressConfig, calls []stressCall) Str
 		go func() {
 			defer wg.Done()
 
-			for shouldStartRequest(ctx, config.Requests, &nextRequest) {
-				requestCtx, cancel := context.WithTimeout(ctx, config.Timeout)
+			for shouldStartRequest(runCtx, config.Requests, &nextRequest) {
+				requestCtx, cancel := context.WithTimeout(requestParentCtx, config.Timeout)
 				startedAt := time.Now()
 				err := call(requestCtx)
 				latency := time.Since(startedAt)
