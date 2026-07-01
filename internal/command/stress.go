@@ -235,7 +235,7 @@ func (command *Stress) logSummary(config StressConfig, result StressResult) {
 		"latency_max", result.MaxLatency.String(),
 		"latency_p95_upper_bound", result.PercentileUpperBound(95).String(),
 		"latency_p99_upper_bound", result.PercentileUpperBound(99).String(),
-		"latency_buckets", result.LatencyBucketsByUpperBound(),
+		"latency_buckets", result.NonEmptyLatencyBuckets(),
 		"status_codes", result.StatusCodesByName(),
 	)
 }
@@ -263,6 +263,12 @@ type StressResult struct {
 	MaxLatency   time.Duration
 
 	LatencyBuckets [len(latencyBucketBounds) + 1]uint64
+}
+
+// LatencyBucket contains the number of requests observed in one latency range.
+type LatencyBucket struct {
+	UpperBound string `json:"upperBound"`
+	Count      uint64 `json:"count"`
 }
 
 func runStress(runCtx context.Context, requestParentCtx context.Context, config StressConfig, calls []stressCall) StressResult {
@@ -406,16 +412,26 @@ func (result StressResult) StatusCodesByName() map[string]uint64 {
 	return codesByName
 }
 
-// LatencyBucketsByUpperBound returns bucket counts keyed by readable upper bounds.
-func (result StressResult) LatencyBucketsByUpperBound() map[string]uint64 {
-	buckets := make(map[string]uint64, len(result.LatencyBuckets))
+// NonEmptyLatencyBuckets returns observed latency buckets in ascending order.
+func (result StressResult) NonEmptyLatencyBuckets() []LatencyBucket {
+	buckets := make([]LatencyBucket, 0, len(result.LatencyBuckets))
 	for i, count := range result.LatencyBuckets {
-		if i >= len(latencyBucketBounds) {
-			buckets[fmt.Sprintf(">%s", latencyBucketBounds[len(latencyBucketBounds)-1])] = count
+		if count == 0 {
 			continue
 		}
 
-		buckets[fmt.Sprintf("<=%s", latencyBucketBounds[i])] = count
+		if i >= len(latencyBucketBounds) {
+			buckets = append(buckets, LatencyBucket{
+				UpperBound: fmt.Sprintf(">%s", latencyBucketBounds[len(latencyBucketBounds)-1]),
+				Count:      count,
+			})
+			continue
+		}
+
+		buckets = append(buckets, LatencyBucket{
+			UpperBound: fmt.Sprintf("<=%s", latencyBucketBounds[i]),
+			Count:      count,
+		})
 	}
 
 	return buckets

@@ -210,9 +210,13 @@ func TestStressResultLatencySummary(t *testing.T) {
 		t.Fatalf("StatusCodesByName()[OK] = %d, want 2", got)
 	}
 
-	latencyBuckets := result.LatencyBucketsByUpperBound()
-	if got := latencyBuckets["<=1ms"]; got != 1 {
-		t.Fatalf("LatencyBucketsByUpperBound()[<=1ms] = %d, want 1", got)
+	latencyBuckets := result.NonEmptyLatencyBuckets()
+	if got, want := len(latencyBuckets), 3; got != want {
+		t.Fatalf("len(NonEmptyLatencyBuckets()) = %d, want %d", got, want)
+	}
+
+	if got, want := latencyBuckets[0], (LatencyBucket{UpperBound: "<=1ms", Count: 1}); got != want {
+		t.Fatalf("NonEmptyLatencyBuckets()[0] = %+v, want %+v", got, want)
 	}
 }
 
