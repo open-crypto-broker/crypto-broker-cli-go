@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/open-crypto-broker/crypto-broker-client-go v0.3.2-0.20260623082632-bcc289445dc1
+	github.com/open-crypto-broker/crypto-broker-client-go v0.3.2-0.20260706105117-2f57ae3ac7c3
 	github.com/spf13/cobra v1.10.2
 	go.opentelemetry.io/contrib/bridges/otelslog v0.19.0
 	go.opentelemetry.io/otel v1.44.0

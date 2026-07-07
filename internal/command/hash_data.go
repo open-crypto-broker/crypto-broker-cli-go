@@ -20,16 +20,16 @@ import (
 	// For now, we'll create the trace context manually
 )
 
-// Hash represents command that repeatedly sends hash request to crypto broker and displays its response
-type Hash struct {
+// HashData represents command that repeatedly sends hash request to crypto broker and displays its response
+type HashData struct {
 	logger              *slog.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 	tracerProvider      *otel.TracerProvider
 }
 
-// NewHash initializes hash command
-func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*Hash, error) {
-	return &Hash{
+// NewHashData initializes hash command
+func NewHashData(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*HashData, error) {
+	return &HashData{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
 		tracerProvider:      tracerProvider,
@@ -37,7 +37,7 @@ func NewHash(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slo
 }
 
 // Run executes command logic.
-func (command *Hash) Run(ctx context.Context, input []byte, flagOutputFormat string, flagProfile string, flagLoop int) error {
+func (command *HashData) Run(ctx context.Context, input []byte, flagOutputFormat string, flagProfile string, flagLoop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
 
 	payload := cryptobrokerclientgo.HashDataPayload{
@@ -87,16 +87,16 @@ func (command *Hash) Run(ctx context.Context, input []byte, flagOutputFormat str
 // hashBytes sends hash request through crypto broker library.
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
-func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
+func (command *HashData) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	correlationId := ""
 	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
 		correlationId = payload.Metadata.TraceContext.CorrelationId
 	}
 
-	ctx, span := tracer.Start(ctx, "CLI.Hash",
+	ctx, span := tracer.Start(ctx, "CLI.HashData",
 		trace.WithAttributes(
-			otel.AttributeRpcMethod.String("Hash"),
+			otel.AttributeRpcMethod.String("HashData"),
 			otel.AttributeCryptoProfile.String(payload.Profile),
 			otel.AttributeCryptoInputSize.Int(len(payload.Input)),
 			otel.AttributeCorrelationId.String(correlationId),
@@ -149,7 +149,7 @@ func (command *Hash) hashBytes(ctx context.Context, payload cryptobrokerclientgo
 }
 
 // gracefulShutdown closes library connection.
-func (command *Hash) gracefulShutdown() error {
+func (command *HashData) gracefulShutdown() error {
 	command.logger.Info("Closing crypto broker library connection")
 	return command.cryptoBrokerLibrary.Close()
 }

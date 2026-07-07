@@ -11,7 +11,7 @@ import (
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
-func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
+func BenchmarkHashData_profile_Default_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -29,7 +29,7 @@ func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
 
-	hashCmd, err := NewHash(ctx, lib, logger, tracerProvider)
+	hashCmd, err := NewHashData(ctx, lib, logger, tracerProvider)
 	if err != nil {
 		b.Fatalf("could not instantiate hash, err: %s", err.Error())
 	}
@@ -51,7 +51,7 @@ func BenchmarkHash_profile_Default_Sequential(b *testing.B) {
 	}
 }
 
-func BenchmarkHash_profile_Default_Parallel(b *testing.B) {
+func BenchmarkHashData_profile_Default_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -71,7 +71,7 @@ func BenchmarkHash_profile_Default_Parallel(b *testing.B) {
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
 
-		hashCmd, err := NewHash(ctx, lib, logger, tracerProvider)
+		hashCmd, err := NewHashData(ctx, lib, logger, tracerProvider)
 		if err != nil {
 			b.Fatalf("could not instantiate hash, err: %s", err.Error())
 		}

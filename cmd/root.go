@@ -5,8 +5,8 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(hashCmd)
-	rootCmd.AddCommand(signCmd)
+	rootCmd.AddCommand(hashDataCmd)
+	rootCmd.AddCommand(signCertificateCmd)
 	rootCmd.AddCommand(healthCmd)
 	rootCmd.AddCommand(benchmarkCmd)
 	rootCmd.AddCommand(fakeEndpointCmd)

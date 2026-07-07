@@ -19,15 +19,15 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type Sign struct {
+type SignCertificate struct {
 	logger              *slog.Logger
 	cryptoBrokerLibrary *cryptobrokerclientgo.Library
 	tracerProvider      *otel.TracerProvider
 }
 
-// InitSign initializes sign command. This may panic in case of failure.
-func NewSign(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*Sign, error) {
-	return &Sign{
+// NewSignCertificate initializes sign command. This may panic in case of failure.
+func NewSignCertificate(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slog.Logger, tracerProvider *otel.TracerProvider) (*SignCertificate, error) {
+	return &SignCertificate{
 		logger:              logger,
 		cryptoBrokerLibrary: lib,
 		tracerProvider:      tracerProvider,
@@ -35,7 +35,7 @@ func NewSign(ctx context.Context, lib *cryptobrokerclientgo.Library, logger *slo
 }
 
 // Run executes command logic.
-func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, filePathSigningKey, flagProfile, flagEncoding, flagSubject string, flagLoop int) error {
+func (command *SignCertificate) Run(ctx context.Context, filePathCSR, filePathCACert, filePathSigningKey, flagProfile, flagEncoding, flagSubject string, flagLoop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
 
 	rawContentCSR, err := command.readFileBytes(filePathCSR)
@@ -103,15 +103,15 @@ func (command *Sign) Run(ctx context.Context, filePathCSR, filePathCACert, fileP
 	}
 }
 
-func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokerclientgo.SignCertificatePayload, flagEncoding string) error {
+func (command *SignCertificate) signCertificate(ctx context.Context, payload cryptobrokerclientgo.SignCertificatePayload, flagEncoding string) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	correlationId := ""
 	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
 		correlationId = payload.Metadata.TraceContext.CorrelationId
 	}
-	ctx, span := tracer.Start(ctx, "CLI.Sign",
+	ctx, span := tracer.Start(ctx, "CLI.SignCertificate",
 		trace.WithAttributes(
-			otel.AttributeRpcMethod.String("Sign"),
+			otel.AttributeRpcMethod.String("SignCertificate"),
 			otel.AttributeCryptoProfile.String(payload.Profile),
 			otel.AttributeCryptoCsrSize.Int(len(payload.CSR)),
 			otel.AttributeCryptoCaCertSize.Int(len(payload.CACert)),
@@ -135,7 +135,7 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 		CorrelationId: correlationId,
 	}
 
-	timestampSignStart := time.Now()
+	timestampSignCertificateStart := time.Now()
 	payload.OutputFormat = cryptobrokerclientgo.OutputFormatPem // default output format
 	if strings.ToLower(flagEncoding) == constant.EncodingDER {
 		payload.OutputFormat = cryptobrokerclientgo.OutputFormatDer
@@ -148,28 +148,28 @@ func (command *Sign) signCertificate(ctx context.Context, payload cryptobrokercl
 		return fmt.Errorf("failed to obtain signed certificate through CryptoBroker library, err: %w", err)
 	}
 
-	timestampSignFinish := time.Now()
-	durationElapsedSign := timestampSignFinish.Sub(timestampSignStart)
+	timestampSignCertificateFinish := time.Now()
+	durationElapsedSignCertificate := timestampSignCertificateFinish.Sub(timestampSignCertificateStart)
 
 	span.SetAttributes(otel.AttributeCryptoSignedCertSize.Int(len(responseBody.GetDer()) + len(responseBody.GetPem())))
 	span.SetStatus(codes.Ok, "Certificate signing completed successfully")
 
-	command.logger.Info("Sign response", "response", responseBody)
+	command.logger.Info("Sign certificate response", "response", responseBody)
 	command.logger.Info(
-		fmt.Sprintf("Certificate Signing took %d µs", durationElapsedSign.Microseconds()),
+		fmt.Sprintf("Certificate Signing took %d µs", durationElapsedSignCertificate.Microseconds()),
 	)
 
 	return nil
 }
 
 // gracefulShutdown closes library connection.
-func (command *Sign) gracefulShutdown() error {
+func (command *SignCertificate) gracefulShutdown() error {
 	command.logger.Info("Closing crypto broker library connection")
 	return command.cryptoBrokerLibrary.Close()
 }
 
 // readFileBytes opens a file and reads its bytes
-func (command *Sign) readFileBytes(filePath string) ([]byte, error) {
+func (command *SignCertificate) readFileBytes(filePath string) ([]byte, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("could not open %s file, err: %w", filePath, err)
