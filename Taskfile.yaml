@@ -150,6 +150,19 @@ tasks:
     cmds:
       - go test ./... -benchmem -run=^$ -bench ^Benchmark
 
+  run-stress-tests:
+    desc: "Run concurrent client connection stress benchmark"
+    vars:
+      CONCURRENT: '{{.CONCURRENT | default "100"}}'
+      COUNT: '{{.COUNT | default "100"}}'
+    env:
+      OTEL_TRACES_SAMPLER: 'always_off'
+      STRESS_BENCHMARK_ENABLED: 'true'
+      STRESS_CONCURRENT: '{{.CONCURRENT}}'
+      STRESS_COUNT: '{{.COUNT}}'
+    cmds:
+      - go test ./internal/command -run=^$ -bench '^BenchmarkStressHashConcurrentConnections$' -benchmem -benchtime={{.CONCURRENT}}x -count=1
+
   assert-benchmarks:
     desc: "Run benchmarks with performance assertions"
     # deps:  [build]

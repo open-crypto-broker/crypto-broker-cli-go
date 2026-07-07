@@ -10,13 +10,6 @@ const (
 	KeywordFlagFilePathCSR        = "csr"
 	KeywordFlagFilePathCACert     = "caCert"
 	KeywordFlagFilePathSigningKey = "caKey"
-	KeywordFlagConnections        = "connections"
-	KeywordFlagConcurrency        = "concurrency"
-	KeywordFlagRequests           = "requests"
-	KeywordFlagDuration           = "duration"
-	KeywordFlagTimeout            = "timeout"
-	KeywordFlagConnectTimeout     = "connect-timeout"
-	KeywordFlagInput              = "input"
 )
 
 // constants that represents supported encodings.

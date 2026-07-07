@@ -10,7 +10,6 @@ func init() {
 	rootCmd.AddCommand(healthCmd)
 	rootCmd.AddCommand(benchmarkCmd)
 	rootCmd.AddCommand(fakeEndpointCmd)
-	rootCmd.AddCommand(stressCmd)
 	rootCmd.AddCommand(versionCmd)
 }
 
