@@ -13,7 +13,6 @@ import (
 
 	"github.com/google/uuid"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
-	"github.com/open-crypto-broker/crypto-broker-client-go/interceptor"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -101,7 +100,7 @@ func runStressHashWave(
 		workerID := workerSequence.Add(1)
 
 		connectCtx, cancelConnect := context.WithTimeout(ctx, stressConnectionTimeout)
-		lib, err := newStressLibrary(connectCtx, workerID)
+		lib, err := newStressLibrary(connectCtx)
 		cancelConnect()
 		if err != nil {
 			recordErr("worker %d: open client connection: %w", workerID, err)
@@ -149,23 +148,8 @@ func runStressHashWave(
 	}
 }
 
-func newStressLibrary(ctx context.Context, workerID int64) (*cryptobrokerclientgo.Library, error) {
-	return cryptobrokerclientgo.NewLibrary(ctx,
-		interceptor.RetryConfig{
-			MaxAttempts:          1,
-			InitialBackoff:       "0s",
-			BackoffMultiplier:    1,
-			RetryableStatusCodes: nil,
-		},
-		interceptor.CircuitConfig{
-			Name:                fmt.Sprintf("crypto-grpc-stress-%d", workerID),
-			MaxRequests:         1,
-			Interval:            "1h",
-			Timeout:             "1s",
-			ConsecutiveFailures: 1,
-			FailureStatusCodes:  nil,
-		},
-	)
+func newStressLibrary(ctx context.Context) (*cryptobrokerclientgo.Library, error) {
+	return cryptobrokerclientgo.NewLibrary(ctx)
 }
 
 func stressEnvInt(b *testing.B, key string, fallback int, minValue int, maxValue int) int {
