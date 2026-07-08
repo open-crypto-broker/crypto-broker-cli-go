@@ -11,7 +11,7 @@ import (
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
-func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential(b *testing.B) {
+func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -28,7 +28,7 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential(b *testin
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
-	signCmd, err := NewSign(ctx, lib, logger, tracerProvider)
+	signCrtCmd, err := NewSignCertificate(ctx, lib, logger, tracerProvider)
 	if err != nil {
 		b.Fatalf("could not instantiate sign, err: %s", err.Error())
 	}
@@ -77,14 +77,14 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 -----END CERTIFICATE-----`),
 	}
 	for b.Loop() {
-		err := signCmd.signCertificate(ctx, payload, "PEM")
+		err := signCrtCmd.signCertificate(ctx, payload, "PEM")
 		if err != nil {
 			b.Fatalf("could not run sign, err: %s", err.Error())
 		}
 	}
 }
 
-func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(b *testing.B) {
+func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -104,7 +104,7 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(b *testing.
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
 
-		signCmd, err := NewSign(ctx, lib, logger, tracerProvider)
+		signCrtCmd, err := NewSignCertificate(ctx, lib, logger, tracerProvider)
 		if err != nil {
 			b.Fatalf("could not instantiate sign, err: %s", err.Error())
 		}
@@ -153,7 +153,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 -----END CERTIFICATE-----`),
 		}
 		for p.Next() {
-			err := signCmd.signCertificate(ctx, payload, "PEM")
+			err := signCrtCmd.signCertificate(ctx, payload, "PEM")
 			if err != nil {
 				b.Fatalf("could not run sign, err: %s", err.Error())
 			}
@@ -161,7 +161,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	})
 }
 
-func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential(b *testing.B) {
+func BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -178,7 +178,7 @@ func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential(b *test
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
-	signCmd, err := NewSign(ctx, lib, logger, tracerProvider)
+	signCrtCmd, err := NewSignCertificate(ctx, lib, logger, tracerProvider)
 	if err != nil {
 		b.Fatalf("could not instantiate sign, err: %s", err.Error())
 	}
@@ -230,14 +230,14 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 -----END CERTIFICATE-----`),
 	}
 	for b.Loop() {
-		err := signCmd.signCertificate(ctx, payload, "PEM")
+		err := signCrtCmd.signCertificate(ctx, payload, "PEM")
 		if err != nil {
 			b.Fatalf("could not run sign, err: %s", err.Error())
 		}
 	}
 }
 
-func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testing.B) {
+func BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -257,7 +257,7 @@ func BenchmarkSign_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testin
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
 
-		signCmd, err := NewSign(ctx, lib, logger, tracerProvider)
+		signCrtCmd, err := NewSignCertificate(ctx, lib, logger, tracerProvider)
 		if err != nil {
 			b.Fatalf("could not instantiate sign, err: %s", err.Error())
 		}
@@ -309,7 +309,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 -----END CERTIFICATE-----`),
 		}
 		for p.Next() {
-			err := signCmd.signCertificate(ctx, payload, "PEM")
+			err := signCrtCmd.signCertificate(ctx, payload, "PEM")
 			if err != nil {
 				b.Fatalf("could not run sign, err: %s", err.Error())
 			}
@@ -317,7 +317,7 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	})
 }
 
-func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential(b *testing.B) {
+func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -334,9 +334,9 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential(b *test
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
-	signCmd, err := NewSign(ctx, lib, logger, tracerProvider)
+	signCrtCmd, err := NewSignCertificate(ctx, lib, logger, tracerProvider)
 	if err != nil {
-		b.Fatalf("could not instantiate sign, err: %s", err.Error())
+		b.Fatalf("could not instantiate sign certificate, err: %s", err.Error())
 	}
 
 	payload := cryptobrokerclientgo.SignCertificatePayload{
@@ -381,14 +381,14 @@ f/KE4vY=
 -----END CERTIFICATE-----`),
 	}
 	for b.Loop() {
-		err := signCmd.signCertificate(ctx, payload, "PEM")
+		err := signCrtCmd.signCertificate(ctx, payload, "PEM")
 		if err != nil {
-			b.Fatalf("could not run sign, err: %s", err.Error())
+			b.Fatalf("could not run sign certificate, err: %s", err.Error())
 		}
 	}
 }
 
-func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testing.B) {
+func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testing.B) {
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -408,9 +408,9 @@ func BenchmarkSign_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testin
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
 
-		signCmd, err := NewSign(ctx, lib, logger, tracerProvider)
+		signCrtCmd, err := NewSignCertificate(ctx, lib, logger, tracerProvider)
 		if err != nil {
-			b.Fatalf("could not instantiate sign, err: %s", err.Error())
+			b.Fatalf("could not instantiate sign certificate, err: %s", err.Error())
 		}
 
 		payload := cryptobrokerclientgo.SignCertificatePayload{
@@ -455,9 +455,9 @@ f/KE4vY=
 -----END CERTIFICATE-----`),
 		}
 		for p.Next() {
-			err := signCmd.signCertificate(ctx, payload, "PEM")
+			err := signCrtCmd.signCertificate(ctx, payload, "PEM")
 			if err != nil {
-				b.Fatalf("could not run sign, err: %s", err.Error())
+				b.Fatalf("could not run sign certificate, err: %s", err.Error())
 			}
 		}
 	})

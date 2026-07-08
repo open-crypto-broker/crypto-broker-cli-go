@@ -102,13 +102,13 @@ tasks:
     cmds:
       - ./bin/{{.APP_NAME}} benchmark
 
-  test-hash:
+  test-hash-data:
     deps: [build]
-    desc: "Test hashing command with Default profile"
+    desc: "Test hashing data command with Default profile"
     vars:
       APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
-      - ./bin/{{.APP_NAME}} hash "Hello" --profile=Default
+      - ./bin/{{.APP_NAME}} hash-data "Hello" --profile=Default
 
   test-health:
     deps: [build]
@@ -118,7 +118,7 @@ tasks:
     cmds:
       - ./bin/{{.APP_NAME}} health
 
-  test-sign:
+  test-sign-certificate:
     deps: [build]
     desc: "Test certificate signing command with Default profile"
     vars:
@@ -127,7 +127,7 @@ tasks:
       - |
         rm -rf $TEST_OUTPUT_DIR
         mkdir -p $TEST_OUTPUT_DIR
-        RESPONSE=$(./bin/{{.APP_NAME}} --profile=Default sign \
+        RESPONSE=$(./bin/{{.APP_NAME}} --profile=Default sign-certificate \
                     --csr=$TEST_CSR_DIR/csr-nist-secp256r1.csr \
                     --caCert=$TEST_CA_DIR/cert-test-CA-nist-secp384r1.pem \
                     --caKey=$TEST_CA_DIR/test-CA-nist-secp384r1.pem)

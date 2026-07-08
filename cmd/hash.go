@@ -16,14 +16,14 @@ import (
 )
 
 func init() {
-	hashCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
-	hashCmd.Flags().StringVarP(&flags.OutputFormat, constant.KeywordFlagOutputFormat, "", "hex", "Specify hash output format: hex or raw")
-	hashCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
+	hashDataCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
+	hashDataCmd.Flags().StringVarP(&flags.OutputFormat, constant.KeywordFlagOutputFormat, "", "hex", "Specify hash output format: hex or raw")
+	hashDataCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
 		fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 }
 
-var hashCmd = &cobra.Command{
-	Use:   "hash SLICE_OF_BYTES_TO_BE_HASHED",
+var hashDataCmd = &cobra.Command{
+	Use:   "hash-data SLICE_OF_BYTES_TO_BE_HASHED",
 	Short: "Hash sends hashing request to crypto broker.",
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -59,7 +59,7 @@ var hashCmd = &cobra.Command{
 			panic(err)
 		}
 
-		hashCommand, err := command.NewHash(ctx, lib, logger, tracerProvider)
+		hashCommand, err := command.NewHashData(ctx, lib, logger, tracerProvider)
 		if err != nil {
 			shutdownTracer()
 			logger.Error("Failed to initialize hash command", "error", err)
