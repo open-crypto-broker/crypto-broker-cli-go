@@ -65,6 +65,14 @@ task test-sign-certificate
 
 For the sign command you need to have the [deployment repository](https://github.com/open-crypto-broker/crypto-broker-deployment) in the same parent directory as this repository. Check the command definitions in the `Taskfile` file to run your own custom commands.
 
+To stress test the broker with concurrent client-side hash requests, run:
+
+```shell
+task run-stress-tests CONCURRENT=1000 COUNT=100
+```
+
+This starts `CONCURRENT` benchmark workers, opens one gRPC client connection per worker, and sends `COUNT` hash requests through each connection.
+
 More thorough testing is also provided in the deployment repository. The same pipeline will run in GitHub Actions when submitting a Pull Request, so it is recommended to also clone and run the testing of the deployment repository.
 
 ## Support, Feedback, Contributing
