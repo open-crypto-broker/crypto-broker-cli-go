@@ -1,0 +1,21 @@
+# Version control & CI
+.git
+.gitignore
+.githooks/
+.github/
+
+# Local env & tooling caches
+.env
+.env.example
+.task/
+
+# Build outputs & test scratch (rebuilt inside the image)
+bin/
+tmp-tests/
+
+# Docs & licensing (not needed to build the binary)
+*.md
+LICENSE
+
+# The Dockerfile itself lives in docker/
+docker/
