@@ -47,7 +47,10 @@ func BenchmarkStressHashConcurrentConnections(b *testing.B) {
 	previousGOMAXPROCS := runtime.GOMAXPROCS(concurrent)
 	defer runtime.GOMAXPROCS(previousGOMAXPROCS)
 
-	b.SetParallelism(1)
+	cores := runtime.GOMAXPROCS(0)
+	parallelismMultiplier := (concurrent + cores - 1) / cores
+
+	b.SetParallelism(parallelismMultiplier)
 	b.ReportAllocs()
 
 	var totalRequests uint64
@@ -124,21 +127,31 @@ func runStressHashWave(
 			return
 		}
 
-		for i := 0; i < requestsPerConnection; i++ {
-			requestCtx, cancelRequest := context.WithTimeout(ctx, stressRequestTimeout)
-			_, requestErr := lib.HashData(requestCtx, cryptobrokerclientgo.HashDataPayload{
-				Profile: "Default",
-				Input:   []byte("stress-test"),
-				Metadata: &cryptobrokerclientgo.Metadata{
-					Id: uuid.New().String(),
-				},
-			})
-			cancelRequest()
+		var requestWg sync.WaitGroup
 
-			statusCounts[stressStatusIndex(status.Code(requestErr))].Add(1)
-			atomic.AddUint64(totalRequests, 1)
+		for i := 0; i < requestsPerConnection; i++ {
+			requestWg.Add(1)
+
+			// Fire each individual request into its own concurrent goroutine
+			go func() {
+				defer requestWg.Done()
+
+				requestCtx, cancelRequest := context.WithTimeout(ctx, stressRequestTimeout)
+				_, requestErr := lib.HashData(requestCtx, cryptobrokerclientgo.HashDataPayload{
+					Profile: "Default",
+					Input:   []byte("stress-test"),
+					Metadata: &cryptobrokerclientgo.Metadata{
+						Id: uuid.New().String(),
+					},
+				})
+				cancelRequest()
+
+				statusCounts[stressStatusIndex(status.Code(requestErr))].Add(1)
+				atomic.AddUint64(totalRequests, 1)
+			}()
 		}
 
+		requestWg.Wait()
 		for pb.Next() {
 		}
 	})
