@@ -2,6 +2,8 @@ module github.com/open-crypto-broker/crypto-broker-cli-go
 
 go 1.26.5
 
+replace github.com/open-crypto-broker/crypto-broker-client-go => ../crypto-broker-client-go
+
 require (
 	github.com/google/uuid v1.6.0
 	github.com/open-crypto-broker/crypto-broker-client-go v0.3.2-0.20260706105117-2f57ae3ac7c3
