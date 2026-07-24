@@ -3,6 +3,30 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.4.0] - 2026-07-24
+
+### 🚀 Features
+
+- Upgrade packages (#79)
+- Guide how to compare benchmarks (#74)
+- Upgrade go version to 1.26.5 (#77)
+- Improve Dockerfile for multi-arch builds (#75)
+- [**breaking**] Renaming around hash and sign (#73)
+- [**breaking**] Updated crypto-broker-client-go and adjusted code to it (#68)
+
+### 🐛 Bug Fixes
+
+- Change Taskfile argument parsing, use goroutines for concurrent requests (#76)
+- Limit create-github-app-token permissions (#64)
+
+### 💼 Other
+
+- Update hash command (#65)
+
+### ⚙️ Miscellaneous Tasks
+
+- Update Alpine in Dockerfile (#67)
+
 ## [0.3.1] - 2026-06-08
 
 ### 🚀 Features
