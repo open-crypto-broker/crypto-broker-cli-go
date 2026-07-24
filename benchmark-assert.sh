@@ -120,6 +120,18 @@ threshold_allocs_per_op_BenchmarkHealth_Sequential=$(ceil "$(awk 'BEGIN {print 1
 threshold_ns_per_op_BenchmarkHealth_Parallel=$(ceil "$(awk 'BEGIN {print 2573472 * (1 + 0.25)}')")
 threshold_allocs_per_op_BenchmarkHealth_Parallel=$(ceil "$(awk 'BEGIN {print 196 * (1 + 0.1)}')")
 
+threshold_ns_per_op_BenchmarkEncryptData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 536214 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkEncryptData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 125 * (1 + 0.1)}')")
+
+threshold_ns_per_op_BenchmarkEncryptData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 243128 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkEncryptData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 127 * (1 + 0.1)}')")
+
+threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 567620 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 118 * (1 + 0.1)}')")
+
+threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 309701 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 122 * (1 + 0.1)}')")
+
 threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential=$(ceil "$(awk 'BEGIN {print 22164674 * (1 + 0.4)}')")
 threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential=$(ceil "$(awk 'BEGIN {print 864 * (1 + 0.1)}')")
 
@@ -143,6 +155,10 @@ run_benchmark_assertion "BenchmarkHashData_profile_Default_Sequential" $threshol
 run_benchmark_assertion "BenchmarkHashData_profile_Default_Parallel" $threshold_ns_per_op_BenchmarkHashData_profile_Default_Parallel $threshold_allocs_per_op_BenchmarkHashData_profile_Default_Parallel
 run_benchmark_assertion "BenchmarkHealth_Sequential" $threshold_ns_per_op_BenchmarkHealth_Sequential $threshold_allocs_per_op_BenchmarkHealth_Sequential
 run_benchmark_assertion "BenchmarkHealth_Parallel" $threshold_ns_per_op_BenchmarkHealth_Parallel $threshold_allocs_per_op_BenchmarkHealth_Parallel
+run_benchmark_assertion "BenchmarkEncryptData_profile_Default_Sequential" $threshold_ns_per_op_BenchmarkEncryptData_profile_Default_Sequential $threshold_allocs_per_op_BenchmarkEncryptData_profile_Default_Sequential
+run_benchmark_assertion "BenchmarkEncryptData_profile_Default_Parallel" $threshold_ns_per_op_BenchmarkEncryptData_profile_Default_Parallel $threshold_allocs_per_op_BenchmarkEncryptData_profile_Default_Parallel
+run_benchmark_assertion "BenchmarkDecryptData_profile_Default_Sequential" $threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Sequential $threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Sequential
+run_benchmark_assertion "BenchmarkDecryptData_profile_Default_Parallel" $threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Parallel $threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Parallel
 run_benchmark_assertion "BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential" $threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential $threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential
 run_benchmark_assertion "BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel" $threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel $threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel
 run_benchmark_assertion "BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential" $threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential $threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential

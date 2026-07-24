@@ -9,6 +9,8 @@ func init() {
 	rootCmd.AddCommand(signCertificateCmd)
 	rootCmd.AddCommand(healthCmd)
 	rootCmd.AddCommand(benchmarkCmd)
+	rootCmd.AddCommand(encryptDataCmd)
+	rootCmd.AddCommand(decryptDataCmd)
 	rootCmd.AddCommand(fakeEndpointCmd)
 	rootCmd.AddCommand(versionCmd)
 }

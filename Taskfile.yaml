@@ -110,6 +110,22 @@ tasks:
     cmds:
       - ./bin/{{.APP_NAME}} hash-data "Hello" --profile=Default
 
+  test-encrypt-data:
+    deps: [build]
+    desc: "Test Default profile AES-256-GCM encryption using the caller-managed known-answer fixture"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - ./bin/{{.APP_NAME}} encrypt-data "Welcome CryptoBroker" --profile=Default --keySource=raw --key=67e1befda6538f162a308bb37b922441bed6e27039a26a48ad8e11c568c4cda0 --nonce=a83f89b37c90f937b8df5011 --aad=36e02c2a81c60eca849739d52dea95f7
+
+  test-decrypt-data:
+    deps: [build]
+    desc: "Test Default profile AES-256-GCM decryption using the caller-managed known-answer fixture"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - ./bin/{{.APP_NAME}} decrypt-data 71416b876fb0d65c484ec20106af15a36454743b --profile=Default --keySource=raw --key=67e1befda6538f162a308bb37b922441bed6e27039a26a48ad8e11c568c4cda0 --nonce=a83f89b37c90f937b8df5011 --aad=36e02c2a81c60eca849739d52dea95f7 --tag=a77b42e960d89683140cae283a87466e
+
   test-health:
     deps: [build]
     desc: "Requests the server status using the CLI's health command"
