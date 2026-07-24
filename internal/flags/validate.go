@@ -27,3 +27,12 @@ func ValidateFlagEncoding(val string) error {
 
 	return nil
 }
+
+// ValidateFlagKeySource validates the configured symmetric key source.
+func ValidateFlagKeySource(val string) error {
+	if val != constant.KeySourceRaw && val != constant.KeySourceKeyID {
+		return fmt.Errorf("'keySource' flag value must be %s or %s", constant.KeySourceRaw, constant.KeySourceKeyID)
+	}
+
+	return nil
+}
