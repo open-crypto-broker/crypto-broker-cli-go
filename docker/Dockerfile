@@ -4,6 +4,12 @@
 ARG GO_VERSION=1.26
 ARG ALPINE_VERSION=3.24
 
+# Runtime user/group id. Must match the uid that owns the crypto-broker server's
+# Unix socket (default 1000). Override at build time with --build-arg APP_UID=...
+# / APP_GID=... to line up with a server built for a different uid.
+ARG APP_UID=1000
+ARG APP_GID=1000
+
 ## Build stage
 # --platform=$BUILDPLATFORM builds on the builder's native architecture and
 # cross-compiles to the requested TARGETOS/TARGETARCH (both injected by buildx).
@@ -28,13 +34,17 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
 ## Deploy stage
 FROM scratch
 
+## Bring the runtime uid/gid build args into this stage's scope.
+ARG APP_UID
+ARG APP_GID
+
 WORKDIR /app
 
 COPY --from=build /app/bin/go-client-cli ./go-client-cli
 
-# Run as non-root uid 1000 so the CLI can connect to the crypto-broker Unix
-# socket, which the server sidecar (also uid 1000) owns. A different uid could
-# not connect to the default 0755 socket.
-USER 1000:1000
+# Run as non-root so the CLI can connect to the crypto-broker Unix socket. The
+# server creates the socket with mode 0600 owned by APP_UID, so only a process
+# running as that same uid (the socket owner) can connect to it.
+USER ${APP_UID}:${APP_GID}
 
 ENTRYPOINT ["./go-client-cli"]

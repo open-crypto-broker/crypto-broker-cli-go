@@ -127,16 +127,17 @@ tasks:
       - |
         rm -rf $TEST_OUTPUT_DIR
         mkdir -p $TEST_OUTPUT_DIR
-        RESPONSE=$(./bin/{{.APP_NAME}} --profile=Default sign-certificate \
+        SIGNED_CERTIFICATE=$(./bin/{{.APP_NAME}} --profile=Default sign-certificate \
                     --csr=$TEST_CSR_DIR/csr-nist-secp256r1.csr \
                     --caCert=$TEST_CA_DIR/cert-test-CA-nist-secp384r1.pem \
-                    --caKey=$TEST_CA_DIR/test-CA-nist-secp384r1.pem)
-        if echo "$RESPONSE" | {{.GREP_CMD}} -E 'Sign [Rr]esponse'; then
-          SIGNED_CERTIFICATE=$(echo "$RESPONSE" | {{.GREP_CMD}} -oP '\"signedCertificate\":\s?"\K[^"]+')
-          printf "$SIGNED_CERTIFICATE" > $TEST_OUTPUT_DIR/cert-response.pem
+                    --caKey=$TEST_CA_DIR/test-CA-nist-secp384r1.pem \
+                    | {{.GREP_CMD}} 'BEGIN CERTIFICATE' \
+                    | jq -r '.response.SignedCertificate.Pem // empty')
+        if [ -n "$SIGNED_CERTIFICATE" ]; then
+          echo "$SIGNED_CERTIFICATE" > $TEST_OUTPUT_DIR/cert-response.pem
           openssl x509 -inform PEM -in $TEST_OUTPUT_DIR/cert-response.pem -text
         else
-          echo -e "Certificate signing failed"
+          echo "Certificate signing failed!"
         fi
 
   # More about benchmarks:

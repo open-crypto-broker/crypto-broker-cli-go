@@ -47,6 +47,18 @@ task build-docker [TAG=opt]
 
 The TAG argument is optional and will apply a custom image tag to the built images. If not specified, it defaults to `latest`. This will create a local image tagged as `server_app:TAG`, which will be saved in your local Docker repository. If you want to modify or append args to the build command, please refer to the one from the Taskfile.
 
+##### Container runtime user
+
+The image runs as a **non-root** user (uid/gid `1000` by default) and connects to the Crypto Broker server over a shared Unix socket in `/tmp/open-crypto-broker`. The server creates that socket with mode `0600` (owner-only), so **the client must run as the same uid as the server**. Both images default to `1000`, so the out-of-the-box setup works.
+
+If you build the server for a different uid, rebuild this client with the matching `APP_UID` / `APP_GID` build args so it can still connect:
+
+```shell
+docker build -f docker/Dockerfile --build-arg APP_UID=1500 --build-arg APP_GID=1500 -t go-client-cli .
+```
+
+Both containers must also share the same `/tmp` volume (a fresh named volume is recommended) so the client can see the server's socket.
+
 ### Testing
 
 To invoke local CI pipeline run
