@@ -11,7 +11,7 @@ import (
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/flags"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
-	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	cryptobroker "github.com/open-crypto-broker/crypto-broker-client-go"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +50,7 @@ var fakeEndpointCmd = &cobra.Command{
 		}
 		defer shutdownTracer()
 
-		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+		lib, err := cryptobroker.NewLibrary(ctx)
 		if err != nil {
 			shutdownTracer()
 			logger.Error("Failed to initialize library", "error", err)

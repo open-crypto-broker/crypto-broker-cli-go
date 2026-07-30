@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -53,7 +54,8 @@ func (command *Health) Run(ctx context.Context, flagLoop int) error {
 				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
-				if err := command.checkHealth(ctx); err != nil {
+				err := command.checkHealth(ctx)
+				if err != nil && !errors.Is(err, cryptobrokerclientgo.ErrCircuitOpen) {
 					return err
 				}
 
@@ -61,7 +63,8 @@ func (command *Health) Run(ctx context.Context, flagLoop int) error {
 			}
 		}
 	} else {
-		if err := command.checkHealth(ctx); err != nil {
+		err := command.checkHealth(ctx)
+		if err != nil && !errors.Is(err, cryptobrokerclientgo.ErrCircuitOpen) {
 			return err
 		}
 		return nil

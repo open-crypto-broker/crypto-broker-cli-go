@@ -62,6 +62,7 @@ func BenchmarkHealth_Parallel(b *testing.B) {
 		if err != nil {
 			b.Fatalf("could not instantiate health, err: %s", err.Error())
 		}
+
 		for p.Next() {
 			err := healthCmd.checkHealth(ctx)
 			if err != nil {

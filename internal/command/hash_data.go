@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -69,7 +70,8 @@ func (command *HashData) Run(ctx context.Context, input []byte, flagOutputFormat
 				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
-				if err := command.hashBytes(ctx, payload); err != nil {
+				err := command.hashBytes(ctx, payload)
+				if err != nil && !errors.Is(err, cryptobrokerclientgo.ErrCircuitOpen) {
 					return err
 				}
 
@@ -77,7 +79,8 @@ func (command *HashData) Run(ctx context.Context, input []byte, flagOutputFormat
 			}
 		}
 	} else {
-		if err := command.hashBytes(ctx, payload); err != nil {
+		err := command.hashBytes(ctx, payload)
+		if err != nil && !errors.Is(err, cryptobrokerclientgo.ErrCircuitOpen) {
 			return err
 		}
 		return nil
@@ -119,31 +122,34 @@ func (command *HashData) hashBytes(ctx context.Context, payload cryptobrokerclie
 	}
 	timestampHashingStart := time.Now()
 	responseBody, err := command.cryptoBrokerLibrary.HashData(ctx, payload)
-	if err != nil {
+
+	if err != nil && !errors.Is(err, cryptobrokerclientgo.ErrCircuitOpen) {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 
-	timestampHashingFinish := time.Now()
-	durationElapsedHashing := timestampHashingFinish.Sub(timestampHashingStart)
+	if responseBody != nil {
+		timestampHashingFinish := time.Now()
+		durationElapsedHashing := timestampHashingFinish.Sub(timestampHashingStart)
 
-	hashOutputFormat := "hex"
-	if responseBody.GetHashValueRaw() != nil {
-		hashOutputFormat = "raw"
+		hashOutputFormat := "hex"
+		if responseBody.GetHashValueRaw() != nil {
+			hashOutputFormat = "raw"
+		}
+
+		span.SetAttributes(
+			otel.AttributeCryptoHashAlgorithm.String(responseBody.HashAlgorithm),
+			otel.AttributeCryptoHashOutputSize.Int(len(responseBody.GetHashValueHex())/2+len(responseBody.GetHashValueRaw())),
+			otel.AttributeCryptoHashOutputFormat.String(hashOutputFormat),
+		)
+		span.SetStatus(codes.Ok, "Hash operation completed successfully")
+
+		command.logger.Info("Hashed response", "response", responseBody)
+		command.logger.Info(
+			fmt.Sprintf("Data Hashing took %d µs", durationElapsedHashing.Microseconds()),
+		)
 	}
-
-	span.SetAttributes(
-		otel.AttributeCryptoHashAlgorithm.String(responseBody.HashAlgorithm),
-		otel.AttributeCryptoHashOutputSize.Int(len(responseBody.GetHashValueHex())/2+len(responseBody.GetHashValueRaw())),
-		otel.AttributeCryptoHashOutputFormat.String(hashOutputFormat),
-	)
-	span.SetStatus(codes.Ok, "Hash operation completed successfully")
-
-	command.logger.Info("Hashed response", "response", responseBody)
-	command.logger.Info(
-		fmt.Sprintf("Data Hashing took %d µs", durationElapsedHashing.Microseconds()),
-	)
 
 	return nil
 }

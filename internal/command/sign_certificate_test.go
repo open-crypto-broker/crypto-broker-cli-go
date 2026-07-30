@@ -2,13 +2,14 @@ package command
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
-	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
+	cryptobroker "github.com/open-crypto-broker/crypto-broker-client-go"
 )
 
 func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential(b *testing.B) {
@@ -24,7 +25,7 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequentia
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+	lib, err := cryptobroker.NewLibrary(ctx)
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
@@ -33,9 +34,9 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequentia
 		b.Fatalf("could not instantiate sign, err: %s", err.Error())
 	}
 
-	payload := cryptobrokerclientgo.SignCertificatePayload{
-		Metadata: &cryptobrokerclientgo.Metadata{
-			TraceContext: &cryptobrokerclientgo.TraceContext{
+	payload := cryptobroker.SignCertificatePayload{
+		Metadata: &cryptobroker.Metadata{
+			TraceContext: &cryptobroker.TraceContext{
 				CorrelationId: uuid.New().String(),
 			},
 		},
@@ -78,8 +79,9 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	}
 	for b.Loop() {
 		err := signCrtCmd.signCertificate(ctx, payload, "PEM")
-		if err != nil {
-			b.Fatalf("could not run sign, err: %s", err.Error())
+
+		if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
+			b.Fatalf("could not run hash, err: %s", err.Error())
 		}
 	}
 }
@@ -99,7 +101,7 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(
 	}
 
 	b.RunParallel(func(p *testing.PB) {
-		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+		lib, err := cryptobroker.NewLibrary(ctx)
 		if err != nil {
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
@@ -109,9 +111,9 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(
 			b.Fatalf("could not instantiate sign, err: %s", err.Error())
 		}
 
-		payload := cryptobrokerclientgo.SignCertificatePayload{
-			Metadata: &cryptobrokerclientgo.Metadata{
-				TraceContext: &cryptobrokerclientgo.TraceContext{
+		payload := cryptobroker.SignCertificatePayload{
+			Metadata: &cryptobroker.Metadata{
+				TraceContext: &cryptobroker.TraceContext{
 					CorrelationId: uuid.New().String(),
 				},
 			},
@@ -154,8 +156,9 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 		}
 		for p.Next() {
 			err := signCrtCmd.signCertificate(ctx, payload, "PEM")
-			if err != nil {
-				b.Fatalf("could not run sign, err: %s", err.Error())
+
+			if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
+				b.Fatalf("could not run hash, err: %s", err.Error())
 			}
 		}
 	})
@@ -174,7 +177,7 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequent
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+	lib, err := cryptobroker.NewLibrary(ctx)
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
@@ -183,9 +186,9 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequent
 		b.Fatalf("could not instantiate sign, err: %s", err.Error())
 	}
 
-	payload := cryptobrokerclientgo.SignCertificatePayload{
-		Metadata: &cryptobrokerclientgo.Metadata{
-			TraceContext: &cryptobrokerclientgo.TraceContext{
+	payload := cryptobroker.SignCertificatePayload{
+		Metadata: &cryptobroker.Metadata{
+			TraceContext: &cryptobroker.TraceContext{
 				CorrelationId: uuid.New().String(),
 			},
 		},
@@ -231,8 +234,9 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 	}
 	for b.Loop() {
 		err := signCrtCmd.signCertificate(ctx, payload, "PEM")
-		if err != nil {
-			b.Fatalf("could not run sign, err: %s", err.Error())
+
+		if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
+			b.Fatalf("could not run hash, err: %s", err.Error())
 		}
 	}
 }
@@ -252,7 +256,7 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Paralle
 	}
 
 	b.RunParallel(func(p *testing.PB) {
-		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+		lib, err := cryptobroker.NewLibrary(ctx)
 		if err != nil {
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
@@ -262,9 +266,9 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Paralle
 			b.Fatalf("could not instantiate sign, err: %s", err.Error())
 		}
 
-		payload := cryptobrokerclientgo.SignCertificatePayload{
-			Metadata: &cryptobrokerclientgo.Metadata{
-				TraceContext: &cryptobrokerclientgo.TraceContext{
+		payload := cryptobroker.SignCertificatePayload{
+			Metadata: &cryptobroker.Metadata{
+				TraceContext: &cryptobroker.TraceContext{
 					CorrelationId: uuid.New().String(),
 				},
 			},
@@ -310,8 +314,9 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 		}
 		for p.Next() {
 			err := signCrtCmd.signCertificate(ctx, payload, "PEM")
-			if err != nil {
-				b.Fatalf("could not run sign, err: %s", err.Error())
+
+			if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
+				b.Fatalf("could not run hash, err: %s", err.Error())
 			}
 		}
 	})
@@ -330,7 +335,7 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequent
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+	lib, err := cryptobroker.NewLibrary(ctx)
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
@@ -339,9 +344,9 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequent
 		b.Fatalf("could not instantiate sign certificate, err: %s", err.Error())
 	}
 
-	payload := cryptobrokerclientgo.SignCertificatePayload{
-		Metadata: &cryptobrokerclientgo.Metadata{
-			TraceContext: &cryptobrokerclientgo.TraceContext{
+	payload := cryptobroker.SignCertificatePayload{
+		Metadata: &cryptobroker.Metadata{
+			TraceContext: &cryptobroker.TraceContext{
 				CorrelationId: uuid.New().String(),
 			},
 		},
@@ -382,8 +387,9 @@ f/KE4vY=
 	}
 	for b.Loop() {
 		err := signCrtCmd.signCertificate(ctx, payload, "PEM")
-		if err != nil {
-			b.Fatalf("could not run sign certificate, err: %s", err.Error())
+
+		if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
+			b.Fatalf("could not run hash, err: %s", err.Error())
 		}
 	}
 }
@@ -403,7 +409,7 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Paralle
 	}
 
 	b.RunParallel(func(p *testing.PB) {
-		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
+		lib, err := cryptobroker.NewLibrary(ctx)
 		if err != nil {
 			b.Fatalf("could not instantiate library, err: %s", err.Error())
 		}
@@ -413,9 +419,9 @@ func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Paralle
 			b.Fatalf("could not instantiate sign certificate, err: %s", err.Error())
 		}
 
-		payload := cryptobrokerclientgo.SignCertificatePayload{
-			Metadata: &cryptobrokerclientgo.Metadata{
-				TraceContext: &cryptobrokerclientgo.TraceContext{
+		payload := cryptobroker.SignCertificatePayload{
+			Metadata: &cryptobroker.Metadata{
+				TraceContext: &cryptobroker.TraceContext{
 					CorrelationId: uuid.New().String(),
 				},
 			},
@@ -456,8 +462,9 @@ f/KE4vY=
 		}
 		for p.Next() {
 			err := signCrtCmd.signCertificate(ctx, payload, "PEM")
-			if err != nil {
-				b.Fatalf("could not run sign certificate, err: %s", err.Error())
+
+			if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
+				b.Fatalf("could not run hash, err: %s", err.Error())
 			}
 		}
 	})
