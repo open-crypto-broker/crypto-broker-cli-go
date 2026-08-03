@@ -3,6 +3,18 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.4.1] - 2026-08-03
+
+### 🚀 Features
+
+- Upgrade client-go to v0.4.1 (#84)
+- Upgrade packages (#83)
+- Handle cicruit breaker errors (#69)
+
+### 🐛 Bug Fixes
+
+- Make uid in Dockerfile configurable (#82)
+
 ## [0.4.0] - 2026-07-24
 
 ### 🚀 Features
