@@ -76,8 +76,11 @@ func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
 func (command *Benchmark) runBenchmark(ctx context.Context) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	ctx, span := tracer.Start(ctx, "CLI.Benchmark",
+		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(otel.AttributeRpcMethod.String("Benchmark")))
 	defer span.End()
+
+	ctx = otel.InjectGRPCTraceContext(ctx)
 
 	// Inject trace context into payload metadata
 	spanContext := span.SpanContext()

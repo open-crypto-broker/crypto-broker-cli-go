@@ -98,6 +98,7 @@ func (command *HashData) hashBytes(ctx context.Context, payload cryptobrokerclie
 	}
 
 	ctx, span := tracer.Start(ctx, "CLI.HashData",
+		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("HashData"),
 			otel.AttributeCryptoProfile.String(payload.Profile),
@@ -105,6 +106,8 @@ func (command *HashData) hashBytes(ctx context.Context, payload cryptobrokerclie
 			otel.AttributeCorrelationId.String(correlationId),
 		))
 	defer span.End()
+
+	ctx = otel.InjectGRPCTraceContext(ctx)
 
 	// Inject trace context into payload metadata
 	spanContext := span.SpanContext()
