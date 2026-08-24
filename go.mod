@@ -2,11 +2,9 @@ module github.com/open-crypto-broker/crypto-broker-cli-go
 
 go 1.26.6
 
-replace github.com/open-crypto-broker/crypto-broker-client-go => ../crypto-broker-client-go
-
 require (
 	github.com/google/uuid v1.6.0
-	github.com/open-crypto-broker/crypto-broker-client-go v0.4.2
+	github.com/open-crypto-broker/crypto-broker-client-go v0.4.3-0.20260824133226-60a52261bcbe
 	github.com/spf13/cobra v1.10.2
 	go.opentelemetry.io/contrib/bridges/otelslog v0.20.0
 	go.opentelemetry.io/otel v1.45.0
