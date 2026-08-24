@@ -19,15 +19,14 @@ import (
 
 func init() {
 	decryptDataCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
-	decryptDataCmd.Flags().StringVarP(&flags.KeySource, constant.KeywordFlagKeySource, "", constant.KeySourceRaw, "Specify key source: raw or key-id")
-	decryptDataCmd.Flags().StringVarP(&flags.Key, constant.KeywordFlagKey, "", "", "Specify raw key or managed key ID")
+	decryptDataCmd.Flags().StringVarP(&flags.KeyRaw, constant.KeywordFlagKeyRaw, "", "", "Specifies the raw key bytes to be used for decryption (hex-based)")
+	decryptDataCmd.Flags().StringVarP(&flags.KeyID, constant.KeywordFlagKeyID, "", "", "Specifies which key from the KMS is used for decryption")
 	decryptDataCmd.Flags().StringVarP(&flags.Nonce, constant.KeywordFlagNonce, "", "", "Specify AES-GCM nonce as hexadecimal")
 	decryptDataCmd.Flags().StringVarP(&flags.AAD, constant.KeywordFlagAAD, "", "", "Specify additional authenticated data as hexadecimal")
 	decryptDataCmd.Flags().StringVarP(&flags.Tag, constant.KeywordFlagTag, "", "", "Specify AES-GCM authentication tag as hexadecimal")
 	decryptDataCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue,
 		fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 	err := errors.Join(
-		decryptDataCmd.MarkFlagRequired(constant.KeywordFlagKey),
 		decryptDataCmd.MarkFlagRequired(constant.KeywordFlagNonce),
 		decryptDataCmd.MarkFlagRequired(constant.KeywordFlagTag),
 	)
@@ -37,14 +36,10 @@ func init() {
 }
 
 var decryptDataCmd = &cobra.Command{
-	Use:   "decrypt-data SLICE_OF_BYTES_TO_BE_DECRYPTED",
+	Use:   "decrypt-data ciphertext",
 	Short: "Decrypt data through Crypto Broker.",
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if err := flags.ValidateFlagKeySource(flags.KeySource); err != nil {
-			slog.Error("Invalid key source flag value", "error", err)
-			panic(err)
-		}
 		if err := flags.ValidateFlagLoop(flags.Loop); err != nil {
 			slog.Error("Invalid loop flag value", "error", err)
 			panic(err)
@@ -89,7 +84,7 @@ var decryptDataCmd = &cobra.Command{
 			logger.Error("Ciphertext must be hexadecimal", "error", err)
 			panic(err)
 		}
-		if err := decryptDataCommand.Run(ctx, ciphertext, flags.Profile, flags.KeySource, flags.Key, flags.Nonce, flags.AAD, flags.Tag, flags.Loop); err != nil {
+		if err := decryptDataCommand.Run(ctx, ciphertext, flags.Profile, flags.KeyRaw, flags.KeyID, flags.Nonce, flags.AAD, flags.Tag, flags.Loop); err != nil {
 			shutdownTracer()
 			logger.Error("Failed to run decrypt-data command", "error", err)
 			panic(err)

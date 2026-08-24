@@ -105,7 +105,7 @@ func BenchmarkEncryptData_profile_Default_Sequential(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
 	}
-	
+
 	b.Cleanup(func() { _ = lib.Close() })
 
 	encryptCmd, err := NewEncryptData(ctx, lib, logger, tracerProvider)
@@ -154,6 +154,6 @@ func benchmarkEncryptionNonce() string {
 	nonce := make([]byte, 12)
 	copy(nonce, "bench")
 	binary.BigEndian.PutUint64(nonce[4:], benchmarkEncryptionNonceCounter.Add(1))
-	
+
 	return hex.EncodeToString(nonce)
 }

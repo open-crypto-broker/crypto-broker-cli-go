@@ -34,7 +34,7 @@ func NewDecryptData(ctx context.Context, lib *cryptobrokerclientgo.Library, logg
 }
 
 // Run executes command logic.
-func (command *DecryptData) Run(ctx context.Context, data []byte, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD, flagTag string, flagLoop int) error {
+func (command *DecryptData) Run(ctx context.Context, data []byte, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD, flagTag string, flagLoop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
 
 	command.logger.Info("Decrypting data")
@@ -54,7 +54,7 @@ func (command *DecryptData) Run(ctx context.Context, data []byte, flagProfile, f
 				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
-				if err := command.decryptData(ctx, data, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD, flagTag); err != nil {
+				if err := command.decryptData(ctx, data, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD, flagTag); err != nil {
 					return err
 				}
 
@@ -62,19 +62,21 @@ func (command *DecryptData) Run(ctx context.Context, data []byte, flagProfile, f
 			}
 		}
 	} else {
-		if err := command.decryptData(ctx, data, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD, flagTag); err != nil {
+		if err := command.decryptData(ctx, data, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD, flagTag); err != nil {
 			return err
 		}
+
 		return nil
 	}
 }
 
 // decryptData decrypts the supplied ciphertext and logs a UTF-8 plaintext response.
-func (command *DecryptData) decryptData(ctx context.Context, data []byte, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD, flagTag string) error {
-	keySource, nonce, aad, err := parseEncryptionInputs(flagKeySource, flagKey, flagNonce, flagAAD)
+func (command *DecryptData) decryptData(ctx context.Context, data []byte, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD, flagTag string) error {
+	keySource, nonce, aad, err := parseEncryptionInputs(flagKeyRaw, flagKeyID, flagNonce, flagAAD)
 	if err != nil {
 		return err
 	}
+
 	tag, err := decodeHex("tag", flagTag)
 	if err != nil {
 		return err
@@ -110,6 +112,7 @@ func (command *DecryptData) decryptData(ctx context.Context, data []byte, flagPr
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
+
 		return fmt.Errorf("could not decrypt data through Crypto Broker: %w", err)
 	}
 

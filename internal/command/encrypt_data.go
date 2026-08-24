@@ -35,7 +35,7 @@ func NewEncryptData(ctx context.Context, lib *cryptobrokerclientgo.Library, logg
 }
 
 // Run executes command logic.
-func (command *EncryptData) Run(ctx context.Context, data []byte, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD string, flagLoop int) error {
+func (command *EncryptData) Run(ctx context.Context, data []byte, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD string, flagLoop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
 
 	command.logger.Info("Encrypting data")
@@ -55,7 +55,7 @@ func (command *EncryptData) Run(ctx context.Context, data []byte, flagProfile, f
 				command.logger.Info("Received SIGTERM signal")
 				return nil
 			default:
-				if err := command.encryptData(ctx, data, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD); err != nil {
+				if err := command.encryptData(ctx, data, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD); err != nil {
 					return err
 				}
 
@@ -63,16 +63,17 @@ func (command *EncryptData) Run(ctx context.Context, data []byte, flagProfile, f
 			}
 		}
 	} else {
-		if err := command.encryptData(ctx, data, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD); err != nil {
+		if err := command.encryptData(ctx, data, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD); err != nil {
 			return err
 		}
+
 		return nil
 	}
 }
 
 // encryptData encrypts the supplied plaintext and logs a hex-encoded response.
-func (command *EncryptData) encryptData(ctx context.Context, data []byte, flagProfile, flagKeySource, flagKey, flagNonce, flagAAD string) error {
-	keySource, nonce, aad, err := parseEncryptionInputs(flagKeySource, flagKey, flagNonce, flagAAD)
+func (command *EncryptData) encryptData(ctx context.Context, data []byte, flagProfile, flagKeyRaw, flagKeyID, flagNonce, flagAAD string) error {
+	keySource, nonce, aad, err := parseEncryptionInputs(flagKeyRaw, flagKeyID, flagNonce, flagAAD)
 	if err != nil {
 		return err
 	}
@@ -106,6 +107,7 @@ func (command *EncryptData) encryptData(ctx context.Context, data []byte, flagPr
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
+
 		return fmt.Errorf("could not encrypt data through Crypto Broker: %w", err)
 	}
 
@@ -124,31 +126,30 @@ func (command *EncryptData) gracefulShutdown() error {
 	return command.cryptoBrokerLibrary.Close()
 }
 
-func parseEncryptionInputs(keySource, key, nonce, aad string) (cryptobrokerclientgo.KeySource, []byte, []byte, error) {
+func parseEncryptionInputs(keyRaw, keyID, nonce, aad string) (cryptobrokerclientgo.KeySource, []byte, []byte, error) {
 	nonceBytes, err := decodeHex("nonce", nonce)
 	if err != nil {
 		return cryptobrokerclientgo.KeySource{}, nil, nil, err
 	}
+
 	aadBytes, err := decodeHex("aad", aad)
 	if err != nil {
 		return cryptobrokerclientgo.KeySource{}, nil, nil, err
 	}
 
-	switch keySource {
-	case constant.KeySourceRaw:
-		rawKey, err := decodeHex("key", key)
+	if keyRaw != "" {
+		rawKey, err := decodeHex("key", keyRaw)
 		if err != nil {
 			return cryptobrokerclientgo.KeySource{}, nil, nil, err
 		}
 		return cryptobrokerclientgo.KeySource{RawKey: rawKey}, nonceBytes, aadBytes, nil
-	case constant.KeySourceKeyID:
-		if key == "" {
-			return cryptobrokerclientgo.KeySource{}, nil, nil, fmt.Errorf("key must not be empty when keySource is %q", constant.KeySourceKeyID)
-		}
-		return cryptobrokerclientgo.KeySource{KeyID: key}, nonceBytes, aadBytes, nil
-	default:
-		return cryptobrokerclientgo.KeySource{}, nil, nil, fmt.Errorf("unsupported keySource %q", keySource)
 	}
+
+	if keyID != "" {
+		return cryptobrokerclientgo.KeySource{KeyID: keyID}, nonceBytes, aadBytes, nil
+	}
+
+	return cryptobrokerclientgo.KeySource{}, nil, nil, fmt.Errorf("either keyRaw or keyID must be provided")
 }
 
 func decodeHex(name, value string) ([]byte, error) {
@@ -156,5 +157,6 @@ func decodeHex(name, value string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid hexadecimal %s: %w", name, err)
 	}
+
 	return decoded, nil
 }
