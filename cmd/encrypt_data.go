@@ -37,10 +37,6 @@ var encryptDataCmd = &cobra.Command{
 	Short: "Encrypt data through Crypto Broker.",
 	Args:  cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if err := flags.ValidateFlagKeySource(flags.KeyRaw); err != nil {
-			slog.Error("Invalid key source flag value", "error", err)
-			panic(err)
-		}
 		if err := flags.ValidateFlagLoop(flags.Loop); err != nil {
 			slog.Error("Invalid loop flag value", "error", err)
 			panic(err)

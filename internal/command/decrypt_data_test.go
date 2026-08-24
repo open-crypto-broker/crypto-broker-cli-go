@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
@@ -50,7 +49,7 @@ func BenchmarkDecryptData_profile_Default_Sequential(b *testing.B) {
 
 	for b.Loop() {
 		if err := decryptCmd.decryptData(ctx, benchmarkEncryptionCiphertext,
-			"Default", constant.KeySourceRaw, benchmarkEncryptionKey, "a83f89b37c90f937b8df5011", benchmarkEncryptionAAD, "a77b42e960d89683140cae283a87466e"); err != nil {
+			"Default", benchmarkEncryptionKey, "", "a83f89b37c90f937b8df5011", benchmarkEncryptionAAD, "a77b42e960d89683140cae283a87466e"); err != nil {
 			b.Fatalf("could not run decrypt, err: %s", err.Error())
 		}
 	}
@@ -78,7 +77,7 @@ func BenchmarkDecryptData_profile_Default_Parallel(b *testing.B) {
 
 		for p.Next() {
 			if err := decryptCmd.decryptData(ctx, benchmarkEncryptionCiphertext,
-				"Default", constant.KeySourceRaw, benchmarkEncryptionKey, "a83f89b37c90f937b8df5011", benchmarkEncryptionAAD, "a77b42e960d89683140cae283a87466e"); err != nil {
+				"Default", benchmarkEncryptionKey, "", "a83f89b37c90f937b8df5011", benchmarkEncryptionAAD, "a77b42e960d89683140cae283a87466e"); err != nil {
 				b.Fatalf("could not run decrypt, err: %s", err.Error())
 			}
 		}
