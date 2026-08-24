@@ -10,7 +10,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
@@ -29,8 +28,8 @@ var (
 
 func TestParseEncryptionInputs_RawKey(t *testing.T) {
 	keySource, nonce, aad, err := parseEncryptionInputs(
-		constant.KeySourceRaw,
 		"1619159426d9ac45243d3da9eed51899",
+		"",
 		"08edd4dd6bfd0d69275ef2d0",
 		"1af8fbdc64693a719f26baa04f0ce8be",
 	)
@@ -53,7 +52,7 @@ func TestParseEncryptionInputs_RawKey(t *testing.T) {
 }
 
 func TestParseEncryptionInputs_KeyID(t *testing.T) {
-	keySource, nonce, aad, err := parseEncryptionInputs(constant.KeySourceKeyID, "managed-key", "00", "")
+	keySource, nonce, aad, err := parseEncryptionInputs("", "managed-key", "00", "")
 	if err != nil {
 		t.Fatalf("parseEncryptionInputs() error = %v", err)
 	}
@@ -71,21 +70,20 @@ func TestParseEncryptionInputs_KeyID(t *testing.T) {
 
 func TestParseEncryptionInputs_InvalidInput(t *testing.T) {
 	tests := []struct {
-		name      string
-		keySource string
-		key       string
-		nonce     string
-		aad       string
+		name   string
+		keyRaw string
+		keyID  string
+		nonce  string
+		aad    string
 	}{
-		{name: "invalid key source", keySource: "unknown", key: "00", nonce: "00"},
-		{name: "invalid raw key hex", keySource: constant.KeySourceRaw, key: "invalid", nonce: "00"},
-		{name: "invalid nonce hex", keySource: constant.KeySourceRaw, key: "00", nonce: "invalid"},
-		{name: "missing key ID", keySource: constant.KeySourceKeyID, nonce: "00"},
+		{name: "invalid raw key hex", keyRaw: "invalid", nonce: "00"},
+		{name: "invalid nonce hex", keyRaw: "00", nonce: "invalid"},
+		{name: "missing key source", nonce: "00"},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, _, _, err := parseEncryptionInputs(test.keySource, test.key, test.nonce, test.aad)
+			_, _, _, err := parseEncryptionInputs(test.keyRaw, test.keyID, test.nonce, test.aad)
 			if err == nil {
 				t.Fatal("parseEncryptionInputs() error = nil, want non-nil")
 			}
@@ -114,8 +112,8 @@ func BenchmarkEncryptData_profile_Default_Sequential(b *testing.B) {
 	}
 
 	for b.Loop() {
-		if err := encryptCmd.encryptData(ctx, benchmarkEncryptionPlaintext, "Default", constant.KeySourceRaw,
-			benchmarkEncryptionKey, benchmarkEncryptionNonce(), benchmarkEncryptionAAD); err != nil {
+		if err := encryptCmd.encryptData(ctx, benchmarkEncryptionPlaintext, "Default", benchmarkEncryptionKey,
+			"", benchmarkEncryptionNonce(), benchmarkEncryptionAAD); err != nil {
 			b.Fatalf("could not run encrypt, err: %s", err.Error())
 		}
 	}
@@ -142,8 +140,8 @@ func BenchmarkEncryptData_profile_Default_Parallel(b *testing.B) {
 		}
 
 		for p.Next() {
-			if err := encryptCmd.encryptData(ctx, benchmarkEncryptionPlaintext, "Default", constant.KeySourceRaw,
-				benchmarkEncryptionKey, benchmarkEncryptionNonce(), benchmarkEncryptionAAD); err != nil {
+			if err := encryptCmd.encryptData(ctx, benchmarkEncryptionPlaintext, "Default", benchmarkEncryptionKey,
+				"", benchmarkEncryptionNonce(), benchmarkEncryptionAAD); err != nil {
 				b.Fatalf("could not run encrypt, err: %s", err.Error())
 			}
 		}
