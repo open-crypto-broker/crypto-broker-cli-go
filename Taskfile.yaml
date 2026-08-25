@@ -68,6 +68,7 @@ tasks:
       - go build -o ./bin/{{.APP_NAME}} -ldflags="-X github.com/open-crypto-broker/crypto-broker-cli-go/cmd.gitSHA={{.CB_GIT_SHA}} -X github.com/open-crypto-broker/crypto-broker-cli-go/cmd.gitTag={{.CB_GIT_TAG}}" main.go
     sources:
       - main.go
+      - cmd/**/*.go
       - internal/**/*.go
       - ./*.go
       - go.mod
@@ -109,6 +110,22 @@ tasks:
       APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - ./bin/{{.APP_NAME}} hash-data "Hello" --profile=Default
+
+  test-encrypt-data:
+    deps: [build]
+    desc: "Test Default profile AES-256-GCM encryption using the caller-managed known-answer fixture"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - ./bin/{{.APP_NAME}} encrypt-data "Welcome CryptoBroker" --profile=Default --keyRaw=67e1befda6538f162a308bb37b922441bed6e27039a26a48ad8e11c568c4cda0 --nonce=a83f89b37c90f937b8df5011 --aad=36e02c2a81c60eca849739d52dea95f7
+
+  test-decrypt-data:
+    deps: [build]
+    desc: "Test Default profile AES-256-GCM decryption using the caller-managed known-answer fixture"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - ./bin/{{.APP_NAME}} decrypt-data 71416b876fb0d65c484ec20106af15a36454743b --profile=Default --keyRaw=67e1befda6538f162a308bb37b922441bed6e27039a26a48ad8e11c568c4cda0 --nonce=a83f89b37c90f937b8df5011 --aad=36e02c2a81c60eca849739d52dea95f7 --tag=a77b42e960d89683140cae283a87466e
 
   test-health:
     deps: [build]
