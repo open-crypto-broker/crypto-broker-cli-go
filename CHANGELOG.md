@@ -3,6 +3,21 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.5.0] - 2026-08-26
+
+### 🚀 Features
+
+- Upgrade client-go (#91)
+- Implement otel context propagation (#87)
+- Upgrade go to version 1.27 (#90)
+- SLSA level 3 adjustments (#89)
+- Added encrypt and decrypt commands (#78)
+- Bump go version to 1.26.6 (#88)
+
+### ⚙️ Miscellaneous Tasks
+
+- Remove OCM variable (#85)
+
 ## [0.4.1] - 2026-08-03
 
 ### 🚀 Features
