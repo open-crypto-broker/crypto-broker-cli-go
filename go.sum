@@ -20,8 +20,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 h1:/Tnpcb2E0Pz/tN9s3bfEY2Q8ePC
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0/go.mod h1:zOBXOsUaBSjKgmH4OGzV1esUpR3oUSCPYVd2cUBjKYY=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
-github.com/open-crypto-broker/crypto-broker-client-go v0.4.3-0.20260824133226-60a52261bcbe h1:KFuwSKqALYmBJq0ekZzdXpt31v8QA8oW+BzKc/JGXr0=
-github.com/open-crypto-broker/crypto-broker-client-go v0.4.3-0.20260824133226-60a52261bcbe/go.mod h1:hTdDc+IlvpKoeJYYeRYnCwXC5crfcsrHUdMFtthpvk4=
+github.com/open-crypto-broker/crypto-broker-client-go v0.5.0 h1:hKR7wZnIELIpBN5ziO/Gcwo9YQ8DhMOMNIPlR50pN3w=
+github.com/open-crypto-broker/crypto-broker-client-go v0.5.0/go.mod h1:5FF+FsRl5X3bayXDdpgI6J48hQTJUepR0e3UdyUQ1Sg=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/sony/gobreaker/v2 v2.4.0 h1:g2KJRW1Ubty3+ZOcSEUN7K+REQJdN6yo6XvaML+jptg=
 github.com/sony/gobreaker/v2 v2.4.0/go.mod h1:pTyFJgcZ3h2tdQVLZZruK2C0eoFL1fb/G83wK1ZQl+s=
