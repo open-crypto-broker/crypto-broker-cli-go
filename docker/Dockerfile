@@ -1,7 +1,7 @@
 ## This Dockerfile builds the Crypto Broker CLI Go test application
 ## This is a simple CLI application that can be used to test the Crypto Broker Server. It is not intended for production use.
 
-ARG GO_VERSION=1.26
+ARG GO_VERSION=1.27
 ARG ALPINE_VERSION=3.24
 
 # Runtime user/group id. Must match the uid that owns the crypto-broker server's
