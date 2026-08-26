@@ -111,6 +111,7 @@ func (command *SignCertificate) signCertificate(ctx context.Context, payload cry
 		correlationId = payload.Metadata.TraceContext.CorrelationId
 	}
 	ctx, span := tracer.Start(ctx, "CLI.SignCertificate",
+		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("SignCertificate"),
 			otel.AttributeCryptoProfile.String(payload.Profile),
@@ -120,6 +121,8 @@ func (command *SignCertificate) signCertificate(ctx context.Context, payload cry
 			otel.AttributeCorrelationId.String(correlationId),
 		))
 	defer span.End()
+
+	ctx = otel.InjectGRPCTraceContext(ctx)
 
 	// Inject trace context into payload metadata
 	spanContext := span.SpanContext()

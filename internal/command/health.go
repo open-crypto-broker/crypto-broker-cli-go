@@ -77,8 +77,11 @@ func (command *Health) Run(ctx context.Context, flagLoop int) error {
 func (command *Health) checkHealth(ctx context.Context) error {
 	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
 	ctx, span := tracer.Start(ctx, "CLI.Health",
+		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(otel.AttributeRpcMethod.String("Health")))
 	defer span.End()
+
+	ctx = otel.InjectGRPCTraceContext(ctx)
 
 	timestampStart := time.Now()
 	responseBody := command.cryptoBrokerLibrary.HealthData(ctx)

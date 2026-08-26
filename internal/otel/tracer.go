@@ -13,6 +13,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
@@ -31,6 +32,13 @@ func GetGlobalTracer() trace.Tracer {
 
 // NewTracerProvider creates and initializes a new OpenTelemetry tracer provider
 func NewTracerProvider(ctx context.Context, logger *slog.Logger) (*TracerProvider, error) {
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{},
+			propagation.Baggage{},
+		),
+	)
+
 	exporterNames := strings.Split(strings.ToLower(tracesExporter), ",")
 	for i, name := range exporterNames {
 		exporterNames[i] = strings.TrimSpace(name)
