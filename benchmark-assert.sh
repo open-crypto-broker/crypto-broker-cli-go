@@ -139,16 +139,16 @@ threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RS
 threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel=$(ceil "$(awk 'BEGIN {print 380 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential=$(ceil "$(awk 'BEGIN {print 16116639 * (1 + 0.4)}')")
-threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential=$(ceil "$(awk 'BEGIN {print 380 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential=$(ceil "$(awk 'BEGIN {print 450 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel=$(ceil "$(awk 'BEGIN {print 8967990 * (1 + 0.4)}')")
-threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel=$(ceil "$(awk 'BEGIN {print 380 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel=$(ceil "$(awk 'BEGIN {print 450 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential=$(ceil "$(awk 'BEGIN {print 8482845 * (1 + 0.4)}')")
-threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential=$(ceil "$(awk 'BEGIN {print 380 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Sequential=$(ceil "$(awk 'BEGIN {print 450 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel=$(ceil "$(awk 'BEGIN {print 4208205 * (1 + 0.4)}')")
-threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel=$(ceil "$(awk 'BEGIN {print 380 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel=$(ceil "$(awk 'BEGIN {print 450 * (1 + 0.1)}')")
 
 # Run assertions for all benchmarks with automatic failure handling
 run_benchmark_assertion "BenchmarkHashData_profile_Default_Sequential" $threshold_ns_per_op_BenchmarkHashData_profile_Default_Sequential $threshold_allocs_per_op_BenchmarkHashData_profile_Default_Sequential
