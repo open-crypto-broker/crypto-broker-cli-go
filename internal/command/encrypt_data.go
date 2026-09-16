@@ -115,6 +115,7 @@ func (command *EncryptData) encryptData(ctx context.Context, data []byte, flagPr
 	command.logger.Info("Encrypt data response",
 		"ciphertext", hex.EncodeToString(response.GetCiphertext()),
 		"tag", hex.EncodeToString(response.GetCipherMetadata().GetTag()),
+		"descriptor", response.GetDescriptor_(),
 	)
 
 	return nil
