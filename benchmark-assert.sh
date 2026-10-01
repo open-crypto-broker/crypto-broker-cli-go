@@ -132,6 +132,18 @@ threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Sequential=$(ceil "
 threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 309701 * (1 + 0.25)}')")
 threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 170 * (1 + 0.1)}')")
 
+threshold_ns_per_op_BenchmarkSignData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 1652292 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkSignData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 143 * (1 + 0.1)}')")
+
+threshold_ns_per_op_BenchmarkSignData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 345014 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkSignData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 144 * (1 + 0.1)}')")
+
+threshold_ns_per_op_BenchmarkVerifyData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 1956772 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 119 * (1 + 0.1)}')")
+
+threshold_ns_per_op_BenchmarkVerifyData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 607397 * (1 + 0.25)}')")
+threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 121 * (1 + 0.1)}')")
+
 threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential=$(ceil "$(awk 'BEGIN {print 22164674 * (1 + 0.4)}')")
 threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential=$(ceil "$(awk 'BEGIN {print 1000 * (1 + 0.1)}')")
 
@@ -159,6 +171,10 @@ run_benchmark_assertion "BenchmarkEncryptData_profile_Default_Sequential" $thres
 run_benchmark_assertion "BenchmarkEncryptData_profile_Default_Parallel" $threshold_ns_per_op_BenchmarkEncryptData_profile_Default_Parallel $threshold_allocs_per_op_BenchmarkEncryptData_profile_Default_Parallel
 run_benchmark_assertion "BenchmarkDecryptData_profile_Default_Sequential" $threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Sequential $threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Sequential
 run_benchmark_assertion "BenchmarkDecryptData_profile_Default_Parallel" $threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Parallel $threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Parallel
+run_benchmark_assertion "BenchmarkSignData_profile_Default_Sequential" $threshold_ns_per_op_BenchmarkSignData_profile_Default_Sequential $threshold_allocs_per_op_BenchmarkSignData_profile_Default_Sequential
+run_benchmark_assertion "BenchmarkSignData_profile_Default_Parallel" $threshold_ns_per_op_BenchmarkSignData_profile_Default_Parallel $threshold_allocs_per_op_BenchmarkSignData_profile_Default_Parallel
+run_benchmark_assertion "BenchmarkVerifyData_profile_Default_Sequential" $threshold_ns_per_op_BenchmarkVerifyData_profile_Default_Sequential $threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Sequential
+run_benchmark_assertion "BenchmarkVerifyData_profile_Default_Parallel" $threshold_ns_per_op_BenchmarkVerifyData_profile_Default_Parallel $threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Parallel
 run_benchmark_assertion "BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential" $threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential $threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Sequential
 run_benchmark_assertion "BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel" $threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel $threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel
 run_benchmark_assertion "BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential" $threshold_ns_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential $threshold_allocs_per_op_BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Sequential

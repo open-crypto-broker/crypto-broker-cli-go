@@ -127,6 +127,33 @@ tasks:
     cmds:
       - ./bin/{{.APP_NAME}} decrypt-data 71416b876fb0d65c484ec20106af15a36454743b --profile=Default --keyRaw=67e1befda6538f162a308bb37b922441bed6e27039a26a48ad8e11c568c4cda0 --nonce=a83f89b37c90f937b8df5011 --aad=36e02c2a81c60eca849739d52dea95f7 --tag=a77b42e960d89683140cae283a87466e
 
+  test-sign-data:
+    deps: [build]
+    desc: "Test Default profile ECDSA signing with a temporary PEM private key"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - |
+        KEY_DIR=$(mktemp -d)
+        trap 'rm -rf "$KEY_DIR"' EXIT
+        openssl ecparam -name secp521r1 -genkey -noout -out "$KEY_DIR/private.pem"
+        ./bin/{{.APP_NAME}} sign-data "Welcome CryptoBroker" --profile=Default --key="$KEY_DIR/private.pem"
+
+  test-verify-data:
+    deps: [build]
+    desc: "Test Default profile ECDSA signature verification with temporary PEM keys"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - |
+        KEY_DIR=$(mktemp -d)
+        trap 'rm -rf "$KEY_DIR"' EXIT
+        openssl ecparam -name secp521r1 -genkey -noout -out "$KEY_DIR/private.pem"
+        openssl ec -in "$KEY_DIR/private.pem" -pubout -out "$KEY_DIR/public.pem"
+        SIGNATURE=$(CRYPTO_BROKER_LOG_OUTPUT=stderr ./bin/{{.APP_NAME}} sign-data "Welcome CryptoBroker" --profile=Default --key="$KEY_DIR/private.pem" 2>&1 >/dev/null | jq -r 'select(.msg == "Sign data response").signature')
+        test -n "$SIGNATURE" && test "$SIGNATURE" != "null"
+        ./bin/{{.APP_NAME}} verify-data "Welcome CryptoBroker" "$SIGNATURE" --profile=Default --key="$KEY_DIR/public.pem"
+
   test-health:
     deps: [build]
     desc: "Requests the server status using the CLI's health command"
