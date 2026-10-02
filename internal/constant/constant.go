@@ -10,6 +10,7 @@ const (
 	KeywordFlagFilePathCSR        = "csr"
 	KeywordFlagFilePathCACert     = "caCert"
 	KeywordFlagFilePathSigningKey = "caKey"
+	KeywordFlagFilePathKey        = "key"
 	KeywordFlagKeyRaw             = "keyRaw"
 	KeywordFlagKeyID              = "keyId"
 	KeywordFlagNonce              = "nonce"

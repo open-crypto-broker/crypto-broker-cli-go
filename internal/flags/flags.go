@@ -10,6 +10,7 @@ var (
 	FilePathCSR        string
 	FilePathCACert     string
 	FilePathSigningKey string
+	FilePathKey        string
 	KeyRaw             string
 	KeyID              string
 	Nonce              string

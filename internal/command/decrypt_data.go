@@ -82,7 +82,7 @@ func (command *DecryptData) decryptData(ctx context.Context, data []byte, flagPr
 		return err
 	}
 
-	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	ctx, span := tracer.Start(ctx, "CLI.DecryptData",
 		trace.WithAttributes(
 			otel.AttributeRpcMethod.String("DecryptData"),
