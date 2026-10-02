@@ -34,6 +34,7 @@ func (command *VerifyData) Run(ctx context.Context, data, signature []byte, prof
 	if err != nil {
 		return err
 	}
+
 	command.logger.Info("Verifying data")
 
 	signals := make(chan os.Signal, 1)
@@ -47,22 +48,25 @@ func (command *VerifyData) Run(ctx context.Context, data, signature []byte, prof
 	if err != nil {
 		return err
 	}
+
 	for {
 		select {
 		case <-signals:
 			command.logger.Info("Received SIGTERM signal")
+
 			return nil
 		default:
 			if _, err := command.verifyData(ctx, data, signature, profile, key); err != nil {
 				return err
 			}
+
 			time.Sleep(delay)
 		}
 	}
 }
 
 func (command *VerifyData) verifyData(ctx context.Context, data, signature []byte, profile string, key []byte) (bool, error) {
-	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	ctx, span := tracer.Start(ctx, "CLI.VerifyData", trace.WithAttributes(
 		otel.AttributeRpcMethod.String("VerifyData"),
 		otel.AttributeCryptoProfile.String(profile),
@@ -86,15 +90,18 @@ func (command *VerifyData) verifyData(ctx context.Context, data, signature []byt
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
+
 		return false, fmt.Errorf("could not verify data through Crypto Broker: %w", err)
 	}
 
 	span.SetStatus(codes.Ok, "VerifyData operation completed successfully")
 	command.logger.Info("Verify data response", "valid", response.GetValid())
+
 	return response.GetValid(), nil
 }
 
 func (command *VerifyData) gracefulShutdown() error {
 	command.logger.Info("Closing crypto broker library connection")
+
 	return command.cryptoBrokerLibrary.Close()
 }

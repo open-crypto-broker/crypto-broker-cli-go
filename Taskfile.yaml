@@ -129,30 +129,29 @@ tasks:
 
   test-sign-data:
     deps: [build]
-    desc: "Test Default profile ECDSA signing with a temporary PEM private key"
+    desc: "Test Default profile ECDSA signing with the shared sign/verify fixture"
     vars:
       APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - |
-        KEY_DIR=$(mktemp -d)
-        trap 'rm -rf "$KEY_DIR"' EXIT
-        openssl ecparam -name secp521r1 -genkey -noout -out "$KEY_DIR/private.pem"
-        ./bin/{{.APP_NAME}} sign-data "Welcome CryptoBroker" --profile=Default --key="$KEY_DIR/private.pem"
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/test.txt
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
+        ./bin/{{.APP_NAME}} sign-data "$(cat {{.SIGN_VERIFY_ARTIFACTS}}/test.txt)" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
 
   test-verify-data:
     deps: [build]
-    desc: "Test Default profile ECDSA signature verification with temporary PEM keys"
+    desc: "Test Default profile ECDSA sign/verify with the shared sign/verify fixture"
     vars:
       APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
     cmds:
       - |
-        KEY_DIR=$(mktemp -d)
-        trap 'rm -rf "$KEY_DIR"' EXIT
-        openssl ecparam -name secp521r1 -genkey -noout -out "$KEY_DIR/private.pem"
-        openssl ec -in "$KEY_DIR/private.pem" -pubout -out "$KEY_DIR/public.pem"
-        SIGNATURE=$(CRYPTO_BROKER_LOG_OUTPUT=stderr ./bin/{{.APP_NAME}} sign-data "Welcome CryptoBroker" --profile=Default --key="$KEY_DIR/private.pem" 2>&1 >/dev/null | jq -r 'select(.msg == "Sign data response").signature')
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/test.txt
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-pub.pem
+        PAYLOAD=$(cat {{.SIGN_VERIFY_ARTIFACTS}}/test.txt)
+        SIGNATURE=$(CRYPTO_BROKER_LOG_OUTPUT=stderr ./bin/{{.APP_NAME}} sign-data "$PAYLOAD" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem 2>&1 >/dev/null | jq -r 'select(.msg == "Sign data response").signature')
         test -n "$SIGNATURE" && test "$SIGNATURE" != "null"
-        ./bin/{{.APP_NAME}} verify-data "Welcome CryptoBroker" "$SIGNATURE" --profile=Default --key="$KEY_DIR/public.pem"
+        ./bin/{{.APP_NAME}} verify-data "$PAYLOAD" "$SIGNATURE" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-pub.pem
 
   test-health:
     deps: [build]

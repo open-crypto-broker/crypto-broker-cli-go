@@ -91,7 +91,7 @@ func (command *HashData) Run(ctx context.Context, input []byte, flagOutputFormat
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *HashData) hashBytes(ctx context.Context, payload cryptobrokerclientgo.HashDataPayload) error {
-	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	correlationId := ""
 	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
 		correlationId = payload.Metadata.TraceContext.CorrelationId

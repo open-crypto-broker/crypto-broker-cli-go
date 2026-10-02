@@ -74,7 +74,7 @@ func (command *Benchmark) Run(ctx context.Context, flagLoop int) error {
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *Benchmark) runBenchmark(ctx context.Context) error {
-	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	ctx, span := tracer.Start(ctx, "CLI.Benchmark",
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(otel.AttributeRpcMethod.String("Benchmark")))

@@ -35,6 +35,7 @@ func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath 
 	if err != nil {
 		return err
 	}
+
 	command.logger.Info("Signing data")
 
 	signals := make(chan os.Signal, 1)
@@ -48,6 +49,7 @@ func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath 
 	if err != nil {
 		return err
 	}
+
 	for {
 		select {
 		case <-signals:
@@ -63,7 +65,7 @@ func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath 
 }
 
 func (command *SignData) signData(ctx context.Context, data []byte, profile string, key []byte) ([]byte, error) {
-	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	ctx, span := tracer.Start(ctx, "CLI.SignData", trace.WithAttributes(
 		otel.AttributeRpcMethod.String("SignData"),
 		otel.AttributeCryptoProfile.String(profile),
@@ -87,16 +89,19 @@ func (command *SignData) signData(ctx context.Context, data []byte, profile stri
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
+
 		return nil, fmt.Errorf("could not sign data through Crypto Broker: %w", err)
 	}
 
 	span.SetStatus(codes.Ok, "SignData operation completed successfully")
 	command.logger.Info("Sign data response", "signature", hex.EncodeToString(response.GetSignature()), "descriptor", response.GetDescriptor_())
+
 	return response.GetSignature(), nil
 }
 
 func (command *SignData) gracefulShutdown() error {
 	command.logger.Info("Closing crypto broker library connection")
+
 	return command.cryptoBrokerLibrary.Close()
 }
 
@@ -104,12 +109,15 @@ func readPEMKey(path string) ([]byte, error) {
 	if path == "" {
 		return nil, fmt.Errorf("key is required")
 	}
+
 	key, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read key file %q: %w", path, err)
 	}
+
 	if len(key) == 0 {
 		return nil, fmt.Errorf("key file %q is empty", path)
 	}
+
 	return key, nil
 }

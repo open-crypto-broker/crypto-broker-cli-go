@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	serviceName    = defaultServiceName
+	ServiceName    = defaultServiceName
 	serviceVersion = defaultServiceVersion
 	tracesExporter = defaultTracesExporter
 	otlpEndpoint   = ""
@@ -18,7 +18,7 @@ var (
 
 func init() {
 	if customServiceName := os.Getenv(env.OTEL_SERVICE_NAME); customServiceName != "" {
-		serviceName = customServiceName
+		ServiceName = customServiceName
 	}
 
 	if customServiceVersion := os.Getenv(env.OTEL_SERVICE_VERSION); customServiceVersion != "" {

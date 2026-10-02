@@ -30,6 +30,7 @@ var signDataCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if err := flags.ValidateFlagLoop(flags.Loop); err != nil {
 			slog.Error("Invalid loop flag value", "error", err)
+
 			panic(err)
 		}
 	},
@@ -40,15 +41,18 @@ var signDataCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
+
 		defer func() { shutdownTracerProvider(logger, tracerProvider) }()
 		lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 		if err != nil {
 			panic(err)
 		}
+
 		command, err := command.NewSignData(ctx, lib, logger, tracerProvider)
 		if err != nil {
 			panic(err)
 		}
+
 		if err := command.Run(ctx, []byte(args[0]), flags.Profile, flags.FilePathKey, flags.Loop); err != nil {
 			panic(err)
 		}
