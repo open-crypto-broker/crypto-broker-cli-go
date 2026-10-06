@@ -127,6 +127,32 @@ tasks:
     cmds:
       - ./bin/{{.APP_NAME}} decrypt-data 71416b876fb0d65c484ec20106af15a36454743b --profile=Default --keyRaw=67e1befda6538f162a308bb37b922441bed6e27039a26a48ad8e11c568c4cda0 --nonce=a83f89b37c90f937b8df5011 --aad=36e02c2a81c60eca849739d52dea95f7 --tag=a77b42e960d89683140cae283a87466e
 
+  test-sign-data:
+    deps: [build]
+    desc: "Test Default profile ECDSA signing with the shared sign/verify fixture"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - |
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/test.txt
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
+        ./bin/{{.APP_NAME}} sign-data "$(cat {{.SIGN_VERIFY_ARTIFACTS}}/test.txt)" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
+
+  test-verify-data:
+    deps: [build]
+    desc: "Test Default profile ECDSA sign/verify with the shared sign/verify fixture"
+    vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
+    cmds:
+      - |
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/test.txt
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
+        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-pub.pem
+        PAYLOAD=$(cat {{.SIGN_VERIFY_ARTIFACTS}}/test.txt)
+        SIGNATURE=$(CRYPTO_BROKER_LOG_OUTPUT=stderr ./bin/{{.APP_NAME}} sign-data "$PAYLOAD" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem 2>&1 >/dev/null | jq -r 'select(.msg == "Sign data response").signature')
+        test -n "$SIGNATURE" && test "$SIGNATURE" != "null"
+        ./bin/{{.APP_NAME}} verify-data "$PAYLOAD" "$SIGNATURE" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-pub.pem
+
   test-health:
     deps: [build]
     desc: "Requests the server status using the CLI's health command"

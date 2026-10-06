@@ -27,7 +27,7 @@ type TracerProvider struct {
 
 // GetGlobalTracer returns the global tracer for the service
 func GetGlobalTracer() trace.Tracer {
-	return otel.Tracer(serviceName)
+	return otel.Tracer(ServiceName)
 }
 
 // NewTracerProvider creates and initializes a new OpenTelemetry tracer provider
@@ -89,7 +89,7 @@ func NewTracerProvider(ctx context.Context, logger *slog.Logger) (*TracerProvide
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceNameKey.String(serviceName),
+			semconv.ServiceNameKey.String(ServiceName),
 			semconv.ServiceVersionKey.String(serviceVersion),
 			semconv.ServiceNamespaceKey.String("crypto-broker"),
 		),

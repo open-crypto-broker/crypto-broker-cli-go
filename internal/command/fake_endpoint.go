@@ -78,7 +78,7 @@ func (command *FakeEndpoint) Run(ctx context.Context, flagLoop int) error {
 // In case of success it displays response and returns nil error, otherwise it returns non-nil error.
 // Internally method measures execution time and prints it through logger.
 func (command *FakeEndpoint) callFakeEndpoint(ctx context.Context, payload cryptobrokerclientgo.FakeEndpointPayload) error {
-	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	correlationId := ""
 	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
 		correlationId = payload.Metadata.TraceContext.CorrelationId

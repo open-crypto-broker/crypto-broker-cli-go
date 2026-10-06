@@ -3,8 +3,13 @@ package command
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/pem"
 	"io"
 	"log/slog"
 	"sync/atomic"
@@ -24,6 +29,7 @@ var benchmarkEncryptionNonceCounter atomic.Uint64
 var (
 	benchmarkEncryptionPlaintext  = []byte("Welcome CryptoBroker")
 	benchmarkEncryptionCiphertext = []byte{0x71, 0x41, 0x6b, 0x87, 0x6f, 0xb0, 0xd6, 0x5c, 0x48, 0x4e, 0xc2, 0x01, 0x06, 0xaf, 0x15, 0xa3, 0x64, 0x54, 0x74, 0x3b}
+	benchmarkSigningInput         = []byte("Welcome CryptoBroker")
 )
 
 func TestParseEncryptionInputs_RawKey(t *testing.T) {
@@ -154,4 +160,21 @@ func benchmarkEncryptionNonce() string {
 	binary.BigEndian.PutUint64(nonce[4:], benchmarkEncryptionNonceCounter.Add(1))
 
 	return hex.EncodeToString(nonce)
+}
+
+func benchmarkSigningKeys(b *testing.B) ([]byte, []byte) {
+	b.Helper()
+	privateKey, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	if err != nil {
+		b.Fatalf("could not generate ECDSA key: %s", err.Error())
+	}
+	privateKeyDER, err := x509.MarshalECPrivateKey(privateKey)
+	if err != nil {
+		b.Fatalf("could not marshal ECDSA private key: %s", err.Error())
+	}
+	publicKeyDER, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		b.Fatalf("could not marshal ECDSA public key: %s", err.Error())
+	}
+	return pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: privateKeyDER}), pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: publicKeyDER})
 }

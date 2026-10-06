@@ -105,7 +105,7 @@ func (command *SignCertificate) Run(ctx context.Context, filePathCSR, filePathCA
 }
 
 func (command *SignCertificate) signCertificate(ctx context.Context, payload cryptobrokerclientgo.SignCertificatePayload, flagEncoding string) error {
-	tracer := command.tracerProvider.GetTracer("crypto-broker-cli-go")
+	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	correlationId := ""
 	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
 		correlationId = payload.Metadata.TraceContext.CorrelationId

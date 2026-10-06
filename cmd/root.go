@@ -11,6 +11,8 @@ func init() {
 	rootCmd.AddCommand(benchmarkCmd)
 	rootCmd.AddCommand(encryptDataCmd)
 	rootCmd.AddCommand(decryptDataCmd)
+	rootCmd.AddCommand(signDataCmd)
+	rootCmd.AddCommand(verifyDataCmd)
 	rootCmd.AddCommand(fakeEndpointCmd)
 	rootCmd.AddCommand(versionCmd)
 }
