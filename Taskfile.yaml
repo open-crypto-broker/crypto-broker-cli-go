@@ -7,6 +7,9 @@ vars:
     sh: git rev-parse HEAD
   CB_GIT_TAG:
     sh: git tag --sort=-creatordate | head -n 1
+  # Continuous integration tool versions
+  GOVULNCHECK_VERSION: "1.8.0"
+  GOLANGCI_LINT_VERSION: "2.14.0"
   # GNU grep support depending on OS
   GREP_CMD:
     sh: |
@@ -16,46 +19,26 @@ vars:
       esac
 
 tasks:
+  default:
+    desc: "Display all available tasks with descriptions"
+    cmds:
+      - task -l
+
   ################# Development Tools ####################
   copy-env:
     desc: "Copies example environment variables to .env file"
     cmds:
       - cp .env.example .env
 
-  bash-add-go-path:
-    desc: "Add Go binary folder to .bashrc if it does not already exists"
-    internal: true
-    platforms: ["linux/amd64"]
-    cmds:
-      - grep -qx 'export PATH="$PATH:$(go env GOPATH)/bin"' ~/.bashrc || echo 'export PATH="$PATH:$(go env GOPATH)/bin"' >> ~/.bashrc
-      - source ~/.bashrc
-
-  # Public task to install Go vulnerability checking tool
   install-go-vulnerability-check:
     desc: "Install Go vulnerability checking tool"
     cmds:
-      - task: install-go-vulnerability-check-linux-amd64
-      - task: install-go-vulnerability-check-darwin
-
-  install-go-vulnerability-check-linux-amd64:
-    desc: "Install Go vulnerability checking tool for Linux"
-    internal: true
-    deps: [bash-add-go-path]
-    platforms: ["linux/amd64"]
-    cmds:
-      - go install golang.org/x/vuln/cmd/govulncheck@latest
-
-  install-go-vulnerability-check-darwin:
-    desc: "Install Go vulnerability checking tool for Apple/macOS"
-    internal: true
-    platforms: ["darwin"]
-    cmds:
-      - brew install govulncheck
+      - go install golang.org/x/vuln/cmd/govulncheck@v{{.GOVULNCHECK_VERSION}}
 
   install-golangci-lint:
     desc: "Install golangci-lint"
     cmds:
-      - curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.13.0
+      - curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v{{.GOLANGCI_LINT_VERSION}}
 
   ################# Build Go CLI ####################
   build:
