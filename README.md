@@ -80,10 +80,20 @@ For the sign command you need to have the [deployment repository](https://github
 To stress test the broker with concurrent client-side hash requests, run:
 
 ```shell
-task run-stress-tests CONCURRENT=1000 COUNT=100
+task run-stress-tests CONCURRENT=1000 NUM=100 COUNT=1
 ```
 
-This starts `CONCURRENT` benchmark workers, opens one gRPC client connection per worker, and sends `COUNT` hash requests through each connection.
+This starts `CONCURRENT` benchmark workers, opens one gRPC client connection per worker, and sends `NUM` concurrent hash requests through each connection. The benchmark repeats `COUNT` times. Defaults are `CONCURRENT=100`, `NUM=100`, and `COUNT=1`.
+
+`CONCURRENT` controls the number of workers/connections. `NUM` controls the number of requests per connection, and those requests also run concurrently.
+
+For example:
+
+```shell
+task run-stress-tests CONCURRENT=10 NUM=100 COUNT=1
+```
+
+This opens 10 connections, each sending 100 concurrent requests, for 1,000 total requests in one run (assuming all connections succeed).
 
 More thorough testing is also provided in the deployment repository. The same pipeline will run in GitHub Actions when submitting a Pull Request, so it is recommended to also clone and run the testing of the deployment repository.
 
