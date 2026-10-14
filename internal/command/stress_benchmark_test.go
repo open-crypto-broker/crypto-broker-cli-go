@@ -33,9 +33,10 @@ const (
 // BenchmarkStressHashConcurrentConnections opens one client connection per
 // parallel worker and sends STRESS_COUNT hash requests on each connection.
 //
+// Taskfile maps NUM to STRESS_COUNT; COUNT controls the number of benchmark runs.
 // Run through Taskfile for a single stress wave:
 //
-//	task run-stress-tests CONCURRENT=1000 COUNT=100
+//	task run-stress-tests CONCURRENT=1000 NUM=100 COUNT=1
 func BenchmarkStressHashConcurrentConnections(b *testing.B) {
 	if os.Getenv(stressEnvEnabled) != "true" {
 		b.Skipf("set %s=true to run broker stress benchmark", stressEnvEnabled)
