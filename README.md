@@ -80,10 +80,18 @@ For the sign command you need to have the [deployment repository](https://github
 To stress test the broker with concurrent client-side hash requests, run:
 
 ```shell
-task run-stress-tests CONCURRENT=1000 COUNT=100
+task run-stress-tests CONCURRENT=1000 NUM=100 COUNT=1
 ```
 
-This starts `CONCURRENT` benchmark workers, opens one gRPC client connection per worker, and sends `COUNT` hash requests through each connection.
+This opens `CONCURRENT` gRPC client connections and sends `NUM` concurrent hash requests through each connection. It repeats the test `COUNT` times. Defaults are `CONCURRENT=100`, `NUM=100`, and `COUNT=1`.
+
+The task builds and uses the normal CLI binary. You can also run it directly:
+
+```shell
+./bin/go-client-cli stress-test --concurrent=10 --num=100 --count=1
+```
+
+This example sends 1,000 requests in one run. Each run prints a Go benchmark result with `ns/op`, `B/op`, `allocs/op`, connection and request counts, requests per second, and gRPC status counts. One operation is one full stress run. RPC errors appear in the status counts; invalid arguments, connection, cleanup, and output errors exit with status 1 for `stress-test`.
 
 More thorough testing is also provided in the deployment repository. The same pipeline will run in GitHub Actions when submitting a Pull Request, so it is recommended to also clone and run the testing of the deployment repository.
 

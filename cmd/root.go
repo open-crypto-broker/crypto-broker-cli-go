@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -9,6 +11,7 @@ func init() {
 	rootCmd.AddCommand(signCertificateCmd)
 	rootCmd.AddCommand(healthCmd)
 	rootCmd.AddCommand(benchmarkCmd)
+	rootCmd.AddCommand(newStressTestCommand())
 	rootCmd.AddCommand(encryptDataCmd)
 	rootCmd.AddCommand(decryptDataCmd)
 	rootCmd.AddCommand(signDataCmd)
@@ -23,5 +26,8 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	_ = rootCmd.Execute()
+	cmd, err := rootCmd.ExecuteC()
+	if err != nil && cmd.Name() == "stress-test" {
+		os.Exit(1)
+	}
 }

@@ -178,18 +178,17 @@ tasks:
       - go test ./... -benchmem -run=^$ -bench ^Benchmark
 
   run-stress-tests:
-    desc: "Run concurrent client connection stress benchmark"
+    desc: "Run concurrent client connection stress test"
+    deps: [build]
     vars:
+      APP_NAME: '{{.APP_NAME | default "go-client-cli"}}'
       CONCURRENT: '{{.CONCURRENT | default "100"}}'
-      NUM: '{{.NUM | default "100"}}' 
-      COUNT: '{{.COUNT | default "1"}}' 
+      NUM: '{{.NUM | default "100"}}'
+      COUNT: '{{.COUNT | default "1"}}'
     env:
       OTEL_TRACES_SAMPLER: 'always_off'
-      STRESS_BENCHMARK_ENABLED: 'true'
-      STRESS_CONCURRENT: '{{.CONCURRENT}}'
-      STRESS_COUNT: '{{.NUM}}' 
     cmds:
-      - go test ./internal/command -run=^$ -bench '^BenchmarkStressHashConcurrentConnections$' -benchmem -benchtime=1x -count={{.COUNT}}
+      - ./bin/{{.APP_NAME}} stress-test --concurrent={{.CONCURRENT}} --num={{.NUM}} --count={{.COUNT}}
 
   assert-benchmarks:
     desc: "Run benchmarks with performance assertions"
