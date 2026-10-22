@@ -10,9 +10,9 @@ import (
 
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/env"
 	"go.opentelemetry.io/contrib/bridges/otelslog"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
-	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/sdk/log"
 )
 
@@ -280,7 +280,7 @@ func setupOTLPLoggerHTTP(ctx context.Context, otlpEndpoint string) *slog.Logger 
 	loggerProvider := log.NewLoggerProvider(
 		log.WithProcessor(logProcessor),
 	)
-	global.SetLoggerProvider(loggerProvider)
+	otel.SetLoggerProvider(loggerProvider)
 	handler := otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(loggerProvider))
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
@@ -327,7 +327,7 @@ func setupOTLPLoggerGRPC(ctx context.Context, otlpEndpoint string) *slog.Logger 
 	loggerProvider := log.NewLoggerProvider(
 		log.WithProcessor(logProcessor),
 	)
-	global.SetLoggerProvider(loggerProvider)
+	otel.SetLoggerProvider(loggerProvider)
 	handler := otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(loggerProvider))
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
