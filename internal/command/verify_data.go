@@ -28,7 +28,7 @@ func NewVerifyData(ctx context.Context, lib *cryptobrokerclientgo.Library, logge
 	return &VerifyData{logger: logger, cryptoBrokerLibrary: lib, tracerProvider: tracerProvider}, nil
 }
 
-func (command *VerifyData) Run(ctx context.Context, data, signature []byte, profile, keyPath string, loop int) error {
+func (command *VerifyData) Run(ctx context.Context, data, signature []byte, profile, keyPath, signatureFormat string, loop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
 	key, err := readPEMKey(keyPath)
 	if err != nil {
@@ -40,7 +40,7 @@ func (command *VerifyData) Run(ctx context.Context, data, signature []byte, prof
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 	if loop < constant.MinLoopFlagValue || loop > constant.MaxLoopFlagValue {
-		_, err := command.verifyData(ctx, data, signature, profile, key)
+		_, err := command.verifyDataWithFormat(ctx, data, signature, profile, key, signatureFormat)
 		return err
 	}
 
@@ -56,7 +56,7 @@ func (command *VerifyData) Run(ctx context.Context, data, signature []byte, prof
 
 			return nil
 		default:
-			if _, err := command.verifyData(ctx, data, signature, profile, key); err != nil {
+			if _, err := command.verifyDataWithFormat(ctx, data, signature, profile, key, signatureFormat); err != nil {
 				return err
 			}
 
@@ -66,6 +66,10 @@ func (command *VerifyData) Run(ctx context.Context, data, signature []byte, prof
 }
 
 func (command *VerifyData) verifyData(ctx context.Context, data, signature []byte, profile string, key []byte) (bool, error) {
+	return command.verifyDataWithFormat(ctx, data, signature, profile, key, constant.EncodingRAW)
+}
+
+func (command *VerifyData) verifyDataWithFormat(ctx context.Context, data, signature []byte, profile string, key []byte, requestedFormat string) (bool, error) {
 	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	ctx, span := tracer.Start(ctx, "CLI.VerifyData", trace.WithAttributes(
 		otel.AttributeRpcMethod.String("VerifyData"),
@@ -75,7 +79,10 @@ func (command *VerifyData) verifyData(ctx context.Context, data, signature []byt
 	defer span.End()
 
 	spanContext := span.SpanContext()
-	signatureFormat := cryptobrokerclientgo.SignatureFormatRaw
+	signatureFormat, err := parseSignatureFormat(requestedFormat)
+	if err != nil {
+		return false, err
+	}
 	response, err := command.cryptoBrokerLibrary.VerifyData(ctx, cryptobrokerclientgo.VerifyDataPayload{
 		Profile:         profile,
 		SignatureFormat: &signatureFormat,

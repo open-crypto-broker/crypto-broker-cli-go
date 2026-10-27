@@ -142,7 +142,7 @@ func (command *HashData) hashBytes(ctx context.Context, payload cryptobrokerclie
 		}
 
 		span.SetAttributes(
-			otel.AttributeCryptoHashAlgorithm.String(responseBody.HashAlgorithm),
+			otel.AttributeCryptoHashAlgorithm.String(responseBody.GetDescriptor_().GetAlgorithm()),
 			otel.AttributeCryptoHashOutputSize.Int(len(responseBody.GetHashValueHex())/2+len(responseBody.GetHashValueRaw())),
 			otel.AttributeCryptoHashOutputFormat.String(hashOutputFormat),
 		)

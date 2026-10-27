@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -29,7 +30,7 @@ func NewSignData(ctx context.Context, lib *cryptobrokerclientgo.Library, logger 
 	return &SignData{logger: logger, cryptoBrokerLibrary: lib, tracerProvider: tracerProvider}, nil
 }
 
-func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath string, loop int) error {
+func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath, signatureFormat string, loop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
 	key, err := readPEMKey(keyPath)
 	if err != nil {
@@ -41,7 +42,8 @@ func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 	if loop < constant.MinLoopFlagValue || loop > constant.MaxLoopFlagValue {
-		_, err := command.signData(ctx, data, profile, key)
+		_, err := command.signData(ctx, data, profile, key, signatureFormat)
+
 		return err
 	}
 
@@ -54,17 +56,20 @@ func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath 
 		select {
 		case <-signals:
 			command.logger.Info("Received SIGTERM signal")
+
 			return nil
 		default:
-			if _, err := command.signData(ctx, data, profile, key); err != nil {
+			if _, err := command.signData(ctx, data, profile, key, signatureFormat); err != nil {
 				return err
 			}
+
 			time.Sleep(delay)
 		}
 	}
 }
 
-func (command *SignData) signData(ctx context.Context, data []byte, profile string, key []byte) ([]byte, error) {
+// domyslny to raw
+func (command *SignData) signData(ctx context.Context, data []byte, profile string, key []byte, requestedFormat string) ([]byte, error) {
 	tracer := command.tracerProvider.GetTracer(otel.ServiceName)
 	ctx, span := tracer.Start(ctx, "CLI.SignData", trace.WithAttributes(
 		otel.AttributeRpcMethod.String("SignData"),
@@ -74,7 +79,11 @@ func (command *SignData) signData(ctx context.Context, data []byte, profile stri
 	defer span.End()
 
 	spanContext := span.SpanContext()
-	signatureFormat := cryptobrokerclientgo.SignatureFormatRaw
+	signatureFormat, err := parseSignatureFormat(requestedFormat)
+	if err != nil {
+		return nil, err
+	}
+
 	response, err := command.cryptoBrokerLibrary.SignData(ctx, cryptobrokerclientgo.SignDataPayload{
 		Profile:         profile,
 		SignatureFormat: &signatureFormat,
@@ -97,6 +106,19 @@ func (command *SignData) signData(ctx context.Context, data []byte, profile stri
 	command.logger.Info("Sign data response", "signature", hex.EncodeToString(response.GetSignature()), "descriptor", response.GetDescriptor_())
 
 	return response.GetSignature(), nil
+}
+
+func parseSignatureFormat(format string) (cryptobrokerclientgo.SignatureFormat, error) {
+	switch strings.ToLower(format) {
+	case constant.EncodingRAW:
+		return cryptobrokerclientgo.SignatureFormatRaw, nil
+	case constant.EncodingDER:
+		return cryptobrokerclientgo.SignatureFormatDER, nil
+	case constant.EncodingPEM:
+		return cryptobrokerclientgo.SignatureFormatPEM, nil
+	default:
+		return 0, fmt.Errorf("unsupported signature format %q", format)
+	}
 }
 
 func (command *SignData) gracefulShutdown() error {

@@ -5,6 +5,7 @@ var (
 	Loop               int
 	Profile            string
 	OutputFormat       string
+	SignatureFormat    string
 	Encoding           string
 	Subject            string
 	FilePathCSR        string
