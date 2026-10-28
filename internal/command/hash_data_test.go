@@ -38,6 +38,7 @@ func BenchmarkHashData_profile_Default_Sequential(b *testing.B) {
 	payload := cryptobroker.HashDataPayload{
 		Profile: "Default",
 		Input:   []byte("Hello world"),
+		OutputFormat: cryptobroker.OutputFormatHex,
 		Metadata: &cryptobroker.Metadata{
 			TraceContext: &cryptobroker.TraceContext{
 				CorrelationId: uuid.New().String(),
@@ -81,6 +82,7 @@ func BenchmarkHashData_profile_Default_Parallel(b *testing.B) {
 		payload := cryptobroker.HashDataPayload{
 			Profile: "Default",
 			Input:   []byte("Hello world"),
+			OutputFormat: cryptobroker.OutputFormatHex,
 			Metadata: &cryptobroker.Metadata{
 				TraceContext: &cryptobroker.TraceContext{
 					CorrelationId: uuid.New().String(),
