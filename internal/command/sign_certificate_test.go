@@ -87,6 +87,8 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 }
 
 func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_RSA4096_Parallel(b *testing.B) {
+	setBenchmarkParallelism(b)
+
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -242,6 +244,8 @@ DKXl/HVVm/pvigXURZC+DzE90ztDcthH55yHm+sMhuE=
 }
 
 func BenchmarkSignCertificate_profile_Default_CSR_SECP521R1_CA_SECP521R1_Parallel(b *testing.B) {
+	setBenchmarkParallelism(b)
+
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -395,6 +399,8 @@ f/KE4vY=
 }
 
 func BenchmarkSignCertificate_profile_Default_CSR_SECP256R1_CA_SECP384R1_Parallel(b *testing.B) {
+	setBenchmarkParallelism(b)
+
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(

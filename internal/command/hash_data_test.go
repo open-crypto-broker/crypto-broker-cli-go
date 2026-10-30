@@ -36,8 +36,8 @@ func BenchmarkHashData_profile_Default_Sequential(b *testing.B) {
 	}
 
 	payload := cryptobroker.HashDataPayload{
-		Profile: "Default",
-		Input:   []byte("Hello world"),
+		Profile:      "Default",
+		Input:        []byte("Hello world"),
 		OutputFormat: cryptobroker.OutputFormatHex,
 		Metadata: &cryptobroker.Metadata{
 			TraceContext: &cryptobroker.TraceContext{
@@ -55,6 +55,8 @@ func BenchmarkHashData_profile_Default_Sequential(b *testing.B) {
 }
 
 func BenchmarkHashData_profile_Default_Parallel(b *testing.B) {
+	setBenchmarkParallelism(b)
+
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(
@@ -80,8 +82,8 @@ func BenchmarkHashData_profile_Default_Parallel(b *testing.B) {
 		}
 
 		payload := cryptobroker.HashDataPayload{
-			Profile: "Default",
-			Input:   []byte("Hello world"),
+			Profile:      "Default",
+			Input:        []byte("Hello world"),
 			OutputFormat: cryptobroker.OutputFormatHex,
 			Metadata: &cryptobroker.Metadata{
 				TraceContext: &cryptobroker.TraceContext{
