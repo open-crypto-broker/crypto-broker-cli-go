@@ -56,6 +56,8 @@ func BenchmarkDecryptData_profile_Default_Sequential(b *testing.B) {
 }
 
 func BenchmarkDecryptData_profile_Default_Parallel(b *testing.B) {
+	setBenchmarkParallelism(b)
+
 	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{AddSource: false}))
 	tracerProvider, err := otel.NewTracerProvider(ctx, logger)
