@@ -18,6 +18,7 @@ import (
 func init() {
 	verifyDataCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
 	verifyDataCmd.Flags().StringVarP(&flags.FilePathKey, constant.KeywordFlagFilePathKey, "", "", "Path to the PEM public key used for verification")
+	verifyDataCmd.Flags().StringVarP(&flags.SignatureFormat, constant.KeywordFlagSignatureFormat, "", constant.EncodingRAW, "Signature format: raw, der, or pem")
 	verifyDataCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue, fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 	if err := errors.Join(verifyDataCmd.MarkFlagRequired(constant.KeywordFlagFilePathKey)); err != nil {
 		panic(err)
@@ -27,6 +28,10 @@ func init() {
 var verifyDataCmd = &cobra.Command{
 	Use: "verify-data input hex-signature", Short: "Verify data through Crypto Broker.", Args: cobra.ExactArgs(2),
 	PreRun: func(cmd *cobra.Command, args []string) {
+		if !validateSignatureFormat(flags.SignatureFormat) {
+			panic(fmt.Errorf("unsupported signature format %q", flags.SignatureFormat))
+		}
+
 		if err := flags.ValidateFlagLoop(flags.Loop); err != nil {
 			slog.Error("Invalid loop flag value", "error", err)
 
@@ -57,7 +62,7 @@ var verifyDataCmd = &cobra.Command{
 			panic(fmt.Errorf("signature must be hexadecimal: %w", err))
 		}
 
-		if err := command.Run(ctx, []byte(args[0]), signature, flags.Profile, flags.FilePathKey, flags.Loop); err != nil {
+		if err := command.Run(ctx, []byte(args[0]), signature, flags.Profile, flags.FilePathKey, flags.SignatureFormat, flags.Loop); err != nil {
 			panic(err)
 		}
 	},

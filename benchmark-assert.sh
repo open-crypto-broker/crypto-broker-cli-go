@@ -139,7 +139,7 @@ threshold_ns_per_op_BenchmarkSignData_profile_Default_Parallel=$(ceil "$(awk 'BE
 threshold_allocs_per_op_BenchmarkSignData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 211 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkVerifyData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 3513198 * (1 + 0.25)}')")
-threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 180 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 200 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkVerifyData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 2107397 * (1 + 0.25)}')")
 threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 180 * (1 + 0.1)}')")

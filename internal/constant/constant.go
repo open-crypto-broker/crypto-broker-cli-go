@@ -5,6 +5,7 @@ const (
 	KeywordFlagProfile            = "profile"
 	KeywordFlagLoop               = "loop"
 	KeywordFlagOutputFormat       = "output-format"
+	KeywordFlagSignatureFormat    = "signature-format"
 	KeywordFlagEncoding           = "encoding"
 	KeywordFlagSubject            = "subject"
 	KeywordFlagFilePathCSR        = "csr"
@@ -28,6 +29,7 @@ const (
 const (
 	EncodingPEM = "pem"
 	EncodingDER = "der"
+	EncodingRAW = "raw"
 )
 
 // constants that represents supported loop flag values.

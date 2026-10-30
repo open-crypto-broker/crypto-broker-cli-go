@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
@@ -27,7 +28,7 @@ func BenchmarkVerifyData_profile_Default_Sequential(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate sign-data command, err: %s", err.Error())
 	}
-	signature, err := signCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM)
+	signature, err := signCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM, constant.EncodingRAW)
 	if err != nil {
 		b.Fatalf("could not create benchmark signature, err: %s", err.Error())
 	}
@@ -59,7 +60,7 @@ func BenchmarkVerifyData_profile_Default_Parallel(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate sign-data command, err: %s", err.Error())
 	}
-	signature, err := setupCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM)
+	signature, err := setupCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM, constant.EncodingRAW)
 	_ = setupLibrary.Close()
 	if err != nil {
 		b.Fatalf("could not create benchmark signature, err: %s", err.Error())

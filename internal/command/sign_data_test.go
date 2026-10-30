@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/constant"
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/otel"
 	cryptobrokerclientgo "github.com/open-crypto-broker/crypto-broker-client-go"
 )
@@ -29,7 +30,7 @@ func BenchmarkSignData_profile_Default_Sequential(b *testing.B) {
 	}
 
 	for b.Loop() {
-		if _, err := command.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM); err != nil {
+		if _, err := command.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM, constant.EncodingRAW); err != nil {
 			b.Fatalf("could not sign data, err: %s", err.Error())
 		}
 	}
@@ -54,7 +55,7 @@ func BenchmarkSignData_profile_Default_Parallel(b *testing.B) {
 			b.Fatalf("could not instantiate sign-data command, err: %s", err.Error())
 		}
 		for p.Next() {
-			if _, err := command.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM); err != nil {
+			if _, err := command.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM, constant.EncodingRAW); err != nil {
 				b.Fatalf("could not sign data, err: %s", err.Error())
 			}
 		}
