@@ -126,7 +126,7 @@ func BenchmarkEncryptData_profile_Default_Sequential(b *testing.B) {
 }
 
 func BenchmarkEncryptData_profile_Default_Parallel(b *testing.B) {
-	setBenchmarkParallelism(b)
+	setTestConcurrency(b)
 
 	ctx := context.Background()
 	logger := slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{AddSource: false}))

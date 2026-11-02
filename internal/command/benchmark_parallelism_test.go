@@ -10,8 +10,8 @@ import (
 	"github.com/open-crypto-broker/crypto-broker-cli-go/internal/env"
 )
 
-func setBenchmarkParallelism(b *testing.B) {
-	multiplicator, err := benchmarkParallelismMultiplicator()
+func setTestConcurrency(b *testing.B) {
+	multiplicator, err := testConcurrencyMultiplicator()
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -19,12 +19,12 @@ func setBenchmarkParallelism(b *testing.B) {
 	b.SetParallelism(multiplicator)
 	b.ReportMetric(
 		float64(runtime.GOMAXPROCS(0))*float64(multiplicator),
-		"parallel_workers",
+		"concurrent_workers",
 	)
 }
 
-func benchmarkParallelismMultiplicator() (int, error) {
-	rawValue := os.Getenv(env.BENCHMARK_PARALLELISM_MULTIPLICATOR)
+func testConcurrencyMultiplicator() (int, error) {
+	rawValue := os.Getenv(env.TEST_CONCURRENCY_MULTIPLICATOR)
 	if rawValue == "" {
 		return 1, nil
 	}
@@ -33,7 +33,7 @@ func benchmarkParallelismMultiplicator() (int, error) {
 	if err != nil || multiplicator < 1 {
 		return 0, fmt.Errorf(
 			"%s must be a positive integer, got %q",
-			env.BENCHMARK_PARALLELISM_MULTIPLICATOR,
+			env.TEST_CONCURRENCY_MULTIPLICATOR,
 			rawValue,
 		)
 	}
@@ -41,7 +41,7 @@ func benchmarkParallelismMultiplicator() (int, error) {
 	return multiplicator, nil
 }
 
-func TestBenchmarkParallelismMultiplicator(t *testing.T) {
+func TestTestConcurrencyMultiplicator(t *testing.T) {
 	testCases := []struct {
 		name    string
 		value   string
@@ -57,14 +57,14 @@ func TestBenchmarkParallelismMultiplicator(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			t.Setenv(env.BENCHMARK_PARALLELISM_MULTIPLICATOR, testCase.value)
+			t.Setenv(env.TEST_CONCURRENCY_MULTIPLICATOR, testCase.value)
 
-			got, err := benchmarkParallelismMultiplicator()
+			got, err := testConcurrencyMultiplicator()
 			if (err != nil) != testCase.wantErr {
-				t.Fatalf("benchmarkParallelismMultiplicator() error = %v, wantErr %t", err, testCase.wantErr)
+				t.Fatalf("testConcurrencyMultiplicator() error = %v, wantErr %t", err, testCase.wantErr)
 			}
 			if got != testCase.want {
-				t.Fatalf("benchmarkParallelismMultiplicator() = %d, want %d", got, testCase.want)
+				t.Fatalf("testConcurrencyMultiplicator() = %d, want %d", got, testCase.want)
 			}
 		})
 	}

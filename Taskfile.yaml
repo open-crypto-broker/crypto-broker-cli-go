@@ -174,17 +174,17 @@ tasks:
     desc: "Command runs benchmarks"
     env:
       OTEL_TRACES_SAMPLER: 'always_off'
-      BENCHMARK_PARALLELISM_MULTIPLICATOR: '1'
+      TEST_CONCURRENCY_MULTIPLICATOR: '1'
     cmds:
       - go test ./... -benchmem -run=^$ -bench ^Benchmark
 
-  run-stress-tests:
-    desc: "Run all parallel benchmarks"
+  run-benchmarks-concurrent:
+    desc: "Run all concurrent benchmarks"
     vars:
-      PARALLELISM_MULTIPLICATOR: '{{.RUN_STRESS_TESTS_PARALLELISM_MULTIPLICATOR | default "1"}}'
+      CONCURRENCY_MULTIPLICATOR: '{{.TEST_CONCURRENCY_MULTIPLICATOR | default "1"}}'
     env:
       OTEL_TRACES_SAMPLER: 'always_off'
-      BENCHMARK_PARALLELISM_MULTIPLICATOR: '{{.PARALLELISM_MULTIPLICATOR}}'
+      TEST_CONCURRENCY_MULTIPLICATOR: '{{.CONCURRENCY_MULTIPLICATOR}}'
     cmds:
       - go test ./internal/command -run=^$ -bench '^Benchmark.*_Parallel$' -benchmem
 

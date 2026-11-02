@@ -55,7 +55,7 @@ func BenchmarkHashData_profile_Default_Sequential(b *testing.B) {
 }
 
 func BenchmarkHashData_profile_Default_Parallel(b *testing.B) {
-	setBenchmarkParallelism(b)
+	setTestConcurrency(b)
 
 	ctx := context.Background()
 	logger := slog.New(
