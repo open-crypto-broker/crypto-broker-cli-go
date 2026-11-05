@@ -180,11 +180,9 @@ tasks:
 
   run-benchmarks-concurrent:
     desc: "Run all concurrent benchmarks"
-    vars:
-      CONCURRENCY_MULTIPLICATOR: '{{.TEST_CONCURRENCY_MULTIPLICATOR | default "1"}}'
     env:
       OTEL_TRACES_SAMPLER: 'always_off'
-      TEST_CONCURRENCY_MULTIPLICATOR: '{{.CONCURRENCY_MULTIPLICATOR}}'
+      TEST_CONCURRENCY_MULTIPLICATOR: '{{.TEST_CONCURRENCY_MULTIPLICATOR | default "1"}}'
     cmds:
       - go test ./internal/command -run=^$ -bench '^Benchmark.*_Parallel$' -benchmem
 
