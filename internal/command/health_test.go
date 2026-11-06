@@ -41,6 +41,8 @@ func BenchmarkHealth_Sequential(b *testing.B) {
 }
 
 func BenchmarkHealth_Parallel(b *testing.B) {
+	setTestConcurrency(b)
+
 	ctx := context.Background()
 	logger := slog.New(
 		slog.NewTextHandler(

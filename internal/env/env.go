@@ -47,4 +47,9 @@ const (
 	// LOG_OUTPUT is environment variable that should contain log output.
 	// Valid values are denoted in internal/clog package
 	LOG_OUTPUT = "CRYPTO_BROKER_LOG_OUTPUT"
+
+	// BENCHMARK_CONCURRENCY_MULTIPLICATOR is environment variable that multiplies
+	// number of concurrent goroutines in concurrent benchmarks.
+	// Should be positive integer
+	TEST_CONCURRENCY_MULTIPLICATOR = "TEST_CONCURRENCY_MULTIPLICATOR"
 )
