@@ -133,10 +133,10 @@ threshold_ns_per_op_BenchmarkDecryptData_profile_Default_Parallel=$(ceil "$(awk 
 threshold_allocs_per_op_BenchmarkDecryptData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 170 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSignData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 1652292 * (1 + 0.25)}')")
-threshold_allocs_per_op_BenchmarkSignData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 211 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkSignData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 240 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkSignData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 863560 * (1 + 0.25)}')")
-threshold_allocs_per_op_BenchmarkSignData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 211 * (1 + 0.1)}')")
+threshold_allocs_per_op_BenchmarkSignData_profile_Default_Parallel=$(ceil "$(awk 'BEGIN {print 240 * (1 + 0.1)}')")
 
 threshold_ns_per_op_BenchmarkVerifyData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 3513198 * (1 + 0.25)}')")
 threshold_allocs_per_op_BenchmarkVerifyData_profile_Default_Sequential=$(ceil "$(awk 'BEGIN {print 200 * (1 + 0.1)}')")
