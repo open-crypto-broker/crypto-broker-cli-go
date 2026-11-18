@@ -470,7 +470,7 @@ f/KE4vY=
 			err := signCrtCmd.signCertificate(ctx, payload, "PEM")
 
 			if err != nil && !errors.Is(err, cryptobroker.ErrCircuitOpen) {
-				b.Fatalf("could not run hash, err: %s", err.Error())
+				b.Fatalf("could not run sign certificate, err: %s", err.Error())
 			}
 		}
 	})
