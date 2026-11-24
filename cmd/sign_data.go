@@ -19,7 +19,7 @@ import (
 
 func init() {
 	signDataCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
-	signDataCmd.Flags().StringVarP(&flags.FilePathKey, constant.KeywordFlagFilePathKey, "", "", "Path to the PEM private key used for signing")
+	signDataCmd.Flags().StringVarP(&flags.FilePathKey, constant.KeywordFlagFilePathKey, "", "", "Path to the PKCS#8 DER private key used for signing")
 	signDataCmd.Flags().StringVarP(&flags.SignatureFormat, constant.KeywordFlagSignatureFormat, "", constant.EncodingRAW, "Signature format: raw, der, or pem")
 	signDataCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue, fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 	if err := errors.Join(signDataCmd.MarkFlagRequired(constant.KeywordFlagFilePathKey)); err != nil {

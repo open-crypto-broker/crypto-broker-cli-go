@@ -3,6 +3,7 @@ version: '3'
 dotenv: ['.env']
 
 vars:
+  KEY_FORMATS_DIR: '{{.ROOT_DIR}}/../crypto-broker-deployment/testing/key-formats'
   CB_GIT_SHA:
     sh: git rev-parse HEAD
   CB_GIT_TAG:
@@ -118,8 +119,8 @@ tasks:
     cmds:
       - |
         test -f {{.SIGN_VERIFY_ARTIFACTS}}/test.txt
-        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
-        ./bin/{{.APP_NAME}} sign-data "$(cat {{.SIGN_VERIFY_ARTIFACTS}}/test.txt)" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
+        test -f "{{.KEY_FORMATS_DIR}}/ec-P-384-pkcs8.der"
+        ./bin/{{.APP_NAME}} sign-data "$(cat {{.SIGN_VERIFY_ARTIFACTS}}/test.txt)" --profile=Default --key="{{.KEY_FORMATS_DIR}}/ec-P-384-pkcs8.der"
 
   test-verify-data:
     deps: [build]
@@ -129,12 +130,12 @@ tasks:
     cmds:
       - |
         test -f {{.SIGN_VERIFY_ARTIFACTS}}/test.txt
-        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem
-        test -f {{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-pub.pem
+        test -f "{{.KEY_FORMATS_DIR}}/ec-P-384-pkcs8.der"
+        test -f "{{.KEY_FORMATS_DIR}}/ec-P-384-spki.der"
         PAYLOAD=$(cat {{.SIGN_VERIFY_ARTIFACTS}}/test.txt)
-        SIGNATURE=$(CRYPTO_BROKER_LOG_OUTPUT=stderr ./bin/{{.APP_NAME}} sign-data "$PAYLOAD" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-priv.pem 2>&1 >/dev/null | jq -r 'select(.msg == "Sign data response").signature')
+        SIGNATURE=$(CRYPTO_BROKER_LOG_OUTPUT=stderr ./bin/{{.APP_NAME}} sign-data "$PAYLOAD" --profile=Default --key="{{.KEY_FORMATS_DIR}}/ec-P-384-pkcs8.der" 2>&1 >/dev/null | jq -r 'select(.msg == "Sign data response").signature')
         test -n "$SIGNATURE" && test "$SIGNATURE" != "null"
-        ./bin/{{.APP_NAME}} verify-data "$PAYLOAD" "$SIGNATURE" --profile=Default --key={{.SIGN_VERIFY_ARTIFACTS}}/ec-secp384r1-pub.pem
+        ./bin/{{.APP_NAME}} verify-data "$PAYLOAD" "$SIGNATURE" --profile=Default --key="{{.KEY_FORMATS_DIR}}/ec-P-384-spki.der"
 
   test-health:
     deps: [build]
@@ -155,8 +156,8 @@ tasks:
         mkdir -p $TEST_OUTPUT_DIR
         SIGNED_CERTIFICATE=$(./bin/{{.APP_NAME}} --profile=Default sign-certificate \
                     --csr=$TEST_CSR_DIR/csr-nist-secp256r1.csr \
-                    --caCert=$TEST_CA_DIR/cert-test-CA-nist-secp384r1.pem \
-                    --caKey=$TEST_CA_DIR/test-CA-nist-secp384r1.pem \
+                    --caCert="{{.KEY_FORMATS_DIR}}/ec-P-384-certificate.pem" \
+                    --caKey="{{.KEY_FORMATS_DIR}}/ec-P-384-pkcs8.der" \
                     | {{.GREP_CMD}} 'BEGIN CERTIFICATE' \
                     | jq -r '.response.SignedCertificate.Pem // empty')
         if [ -n "$SIGNED_CERTIFICATE" ]; then

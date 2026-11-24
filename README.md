@@ -4,6 +4,10 @@
 
 The Crypto Broker CLI is a CLI-type example program written in Golang that allow users to interact with a Crypto Broker Server using crypto-broker-client-go library.
 
+Private keys passed to `sign-data --key` or `sign-certificate --caKey` must be
+PKCS#8 DER encoded. PEM, PKCS#1, and SEC1 private keys are not accepted.
+CA certificates, CSRs, public keys, and signature output formats are unchanged.
+
 ## Development
 
 This section covers how to contribute to the project and develop it further.
@@ -76,6 +80,11 @@ task test-sign-certificate
 ```
 
 For the sign command you need to have the [deployment repository](https://github.com/open-crypto-broker/crypto-broker-deployment) in the same parent directory as this repository. Check the command definitions in the `Taskfile` file to run your own custom commands.
+
+The signing tasks use the matching `ec-P-384-pkcs8.der`, `ec-P-384-spki.der`,
+and `ec-P-384-certificate.pem` fixtures in the deployment repository's
+`testing/key-formats` directory. Override `KEY_FORMATS_DIR` if your deployment
+checkout is elsewhere.
 
 More thorough testing is also provided in the deployment repository. The same pipeline will run in GitHub Actions when submitting a Pull Request, so it is recommended to also clone and run the testing of the deployment repository.
 

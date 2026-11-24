@@ -62,12 +62,14 @@ func (command *SignCertificate) Run(ctx context.Context, filePathCSR, filePathCA
 	}
 
 	payload := cryptobrokerclientgo.SignCertificatePayload{
-		Profile:      flagProfile,
-		CSR:          rawContentCSR,
-		CAPrivateKey: rawContentSigningKey,
-		CACert:       rawContentCACert,
-		Subject:      subject,
-		Metadata:     nil, // Will be set in signCertificate with trace context
+		Profile: flagProfile,
+		CSR:     rawContentCSR,
+		KeySource: cryptobrokerclientgo.SignKeySource{Single: &cryptobrokerclientgo.KeySource{
+			RawKey: rawContentSigningKey,
+		}},
+		CACert:   rawContentCACert,
+		Subject:  subject,
+		Metadata: nil, // Will be set in signCertificate with trace context
 	}
 
 	command.logger.Info(
@@ -110,6 +112,10 @@ func (command *SignCertificate) signCertificate(ctx context.Context, payload cry
 	if payload.Metadata != nil && payload.Metadata.TraceContext != nil {
 		correlationId = payload.Metadata.TraceContext.CorrelationId
 	}
+	keySize := 0
+	if payload.KeySource.Single != nil {
+		keySize = len(payload.KeySource.Single.RawKey)
+	}
 	ctx, span := tracer.Start(ctx, "CLI.SignCertificate",
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(
@@ -117,7 +123,7 @@ func (command *SignCertificate) signCertificate(ctx context.Context, payload cry
 			otel.AttributeCryptoProfile.String(payload.Profile),
 			otel.AttributeCryptoCsrSize.Int(len(payload.CSR)),
 			otel.AttributeCryptoCaCertSize.Int(len(payload.CACert)),
-			otel.AttributeCryptoCaKeySize.Int(len(payload.CAPrivateKey)),
+			otel.AttributeCryptoCaKeySize.Int(keySize),
 			otel.AttributeCorrelationId.String(correlationId),
 		))
 	defer span.End()

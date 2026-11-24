@@ -18,7 +18,7 @@ func BenchmarkVerifyData_profile_Default_Sequential(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-	privateKeyPEM, publicKeyPEM := benchmarkSigningKeys(b)
+	privateKeyDER, publicKeyPEM := benchmarkSigningKeys(b)
 	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
@@ -28,7 +28,7 @@ func BenchmarkVerifyData_profile_Default_Sequential(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate sign-data command, err: %s", err.Error())
 	}
-	signature, err := signCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM, constant.EncodingRAW)
+	signature, err := signCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyDER, constant.EncodingRAW)
 	if err != nil {
 		b.Fatalf("could not create benchmark signature, err: %s", err.Error())
 	}
@@ -53,7 +53,7 @@ func BenchmarkVerifyData_profile_Default_Parallel(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-	privateKeyPEM, publicKeyPEM := benchmarkSigningKeys(b)
+	privateKeyDER, publicKeyPEM := benchmarkSigningKeys(b)
 	setupLibrary, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
@@ -62,7 +62,7 @@ func BenchmarkVerifyData_profile_Default_Parallel(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate sign-data command, err: %s", err.Error())
 	}
-	signature, err := setupCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyPEM, constant.EncodingRAW)
+	signature, err := setupCommand.signData(ctx, benchmarkSigningInput, "Default", privateKeyDER, constant.EncodingRAW)
 	_ = setupLibrary.Close()
 	if err != nil {
 		b.Fatalf("could not create benchmark signature, err: %s", err.Error())
