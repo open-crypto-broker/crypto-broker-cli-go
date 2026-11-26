@@ -18,7 +18,7 @@ func BenchmarkVerifyData_profile_Default_Sequential(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-	privateKeyDER, publicKeyPEM := benchmarkSigningKeys(b)
+	privateKeyDER, publicKeyDER := benchmarkSigningKeys(b)
 	lib, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
@@ -37,7 +37,7 @@ func BenchmarkVerifyData_profile_Default_Sequential(b *testing.B) {
 		b.Fatalf("could not instantiate verify-data command, err: %s", err.Error())
 	}
 	for b.Loop() {
-		valid, err := verifyCommand.verifyData(ctx, benchmarkSigningInput, signature, "Default", publicKeyPEM)
+		valid, err := verifyCommand.verifyData(ctx, benchmarkSigningInput, signature, "Default", publicKeyDER)
 		if err != nil || !valid {
 			b.Fatalf("could not verify data: valid=%t err=%v", valid, err)
 		}
@@ -53,7 +53,7 @@ func BenchmarkVerifyData_profile_Default_Parallel(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not instantiate tracer provider, err: %s", err.Error())
 	}
-	privateKeyDER, publicKeyPEM := benchmarkSigningKeys(b)
+	privateKeyDER, publicKeyDER := benchmarkSigningKeys(b)
 	setupLibrary, err := cryptobrokerclientgo.NewLibrary(ctx)
 	if err != nil {
 		b.Fatalf("could not instantiate library, err: %s", err.Error())
@@ -78,7 +78,7 @@ func BenchmarkVerifyData_profile_Default_Parallel(b *testing.B) {
 			b.Fatalf("could not instantiate verify-data command, err: %s", err.Error())
 		}
 		for p.Next() {
-			valid, err := command.verifyData(ctx, benchmarkSigningInput, signature, "Default", publicKeyPEM)
+			valid, err := command.verifyData(ctx, benchmarkSigningInput, signature, "Default", publicKeyDER)
 			if err != nil || !valid {
 				b.Fatalf("could not verify data: valid=%t err=%v", valid, err)
 			}

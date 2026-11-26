@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/pem"
 	"io"
 	"log/slog"
 	"sync/atomic"
@@ -178,5 +177,5 @@ func benchmarkSigningKeys(b *testing.B) ([]byte, []byte) {
 	if err != nil {
 		b.Fatalf("could not marshal ECDSA public key: %s", err.Error())
 	}
-	return privateKeyDER, pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: publicKeyDER})
+	return privateKeyDER, publicKeyDER
 }

@@ -25,7 +25,7 @@ func init() {
 	signCertificateCmd.Flags().StringVarP(&flags.Subject, constant.KeywordFlagSubject, "", "", "Specify custom subject to be used for certificate generation")
 	signCertificateCmd.Flags().StringVarP(&flags.FilePathCSR, constant.KeywordFlagFilePathCSR, "", "", "Specify relative path to CSR file")
 	signCertificateCmd.Flags().StringVarP(&flags.FilePathCACert, constant.KeywordFlagFilePathCACert, "", "", "Specify relative path to CA certificate file")
-	signCertificateCmd.Flags().StringVarP(&flags.FilePathSigningKey, constant.KeywordFlagFilePathSigningKey, "", "", "Specify relative path to PKCS#8 DER signing key file")
+	signCertificateCmd.Flags().StringVarP(&flags.FilePathSigningKey, constant.KeywordFlagFilePathSigningKey, "", "", "Path to the PKCS#8 signing key in DER or PRIVATE KEY PEM format")
 
 	var err error
 	err = errors.Join(err, signCertificateCmd.MarkFlagRequired(constant.KeywordFlagFilePathCSR))

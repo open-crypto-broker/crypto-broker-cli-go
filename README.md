@@ -5,8 +5,13 @@
 The Crypto Broker CLI is a CLI-type example program written in Golang that allow users to interact with a Crypto Broker Server using crypto-broker-client-go library.
 
 Private keys passed to `sign-data --key` or `sign-certificate --caKey` must be
-PKCS#8 DER encoded. PEM, PKCS#1, and SEC1 private keys are not accepted.
-CA certificates, CSRs, public keys, and signature output formats are unchanged.
+PKCS#8 DER or standard `PRIVATE KEY` PEM. Verification keys use SPKI DER;
+public-key PEM is not supported. Private-key PEM must contain exactly one block
+without headers or extra data. The client decodes private-key PEM; DER is forwarded unchanged
+for server validation. PKCS#1, SEC1, and certificates as verification keys are
+not supported. ML-DSA uses the same standard private-key label and seed-only RFC 9881
+private keys; expanded/combined keys and custom ML-DSA labels are not supported.
+CA certificates, CSRs, and signature output formats are unchanged.
 
 ## Development
 
