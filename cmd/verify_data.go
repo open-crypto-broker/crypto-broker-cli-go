@@ -17,7 +17,7 @@ import (
 
 func init() {
 	verifyDataCmd.Flags().StringVarP(&flags.Profile, constant.KeywordFlagProfile, "", "Default", "Specify profile to be used")
-	verifyDataCmd.Flags().StringVarP(&flags.FilePathKey, constant.KeywordFlagFilePathKey, "", "", "Path to the SubjectPublicKeyInfo DER public key used for verification")
+	verifyDataCmd.Flags().StringVarP(&flags.FilePathKey, constant.KeywordFlagFilePathKey, "", "", "Path to a SubjectPublicKeyInfo public key in DER or PUBLIC KEY PEM format")
 	verifyDataCmd.Flags().StringVarP(&flags.SignatureFormat, constant.KeywordFlagSignatureFormat, "", constant.EncodingRAW, "Signature format: raw, der, or pem")
 	verifyDataCmd.Flags().IntVarP(&flags.Loop, constant.KeywordFlagLoop, "", constant.NoLoopFlagValue, fmt.Sprintf("Specify delay for loop in milliseconds (%d-%d)", constant.MinLoopFlagValue, constant.MaxLoopFlagValue))
 	if err := errors.Join(verifyDataCmd.MarkFlagRequired(constant.KeywordFlagFilePathKey)); err != nil {
