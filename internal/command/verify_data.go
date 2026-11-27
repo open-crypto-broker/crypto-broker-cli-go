@@ -30,7 +30,7 @@ func NewVerifyData(ctx context.Context, lib *cryptobrokerclientgo.Library, logge
 
 func (command *VerifyData) Run(ctx context.Context, data, signature []byte, profile, keyPath, signatureFormat string, loop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
-	key, err := readPEMKey(keyPath)
+	key, err := readKey(keyPath)
 	if err != nil {
 		return err
 	}

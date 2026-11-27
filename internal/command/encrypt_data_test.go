@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/pem"
 	"io"
 	"log/slog"
 	"sync/atomic"
@@ -170,7 +169,7 @@ func benchmarkSigningKeys(b *testing.B) ([]byte, []byte) {
 	if err != nil {
 		b.Fatalf("could not generate ECDSA key: %s", err.Error())
 	}
-	privateKeyDER, err := x509.MarshalECPrivateKey(privateKey)
+	privateKeyDER, err := x509.MarshalPKCS8PrivateKey(privateKey)
 	if err != nil {
 		b.Fatalf("could not marshal ECDSA private key: %s", err.Error())
 	}
@@ -178,5 +177,5 @@ func benchmarkSigningKeys(b *testing.B) ([]byte, []byte) {
 	if err != nil {
 		b.Fatalf("could not marshal ECDSA public key: %s", err.Error())
 	}
-	return pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: privateKeyDER}), pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: publicKeyDER})
+	return privateKeyDER, publicKeyDER
 }

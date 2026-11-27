@@ -20,8 +20,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0 h1:vzlTzzi4tHLa/JQdIE5LeXw6SEX
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0/go.mod h1:FHXQZnW5pA0txiMr3jApv9uNJzZ+7mYZd+u+PPenCFU=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
-github.com/open-crypto-broker/crypto-broker-client-go v0.5.1-0.20261117100841-4467fee7b93b h1:AucsfssrAGJczFo9KPPSFvjd18C621ZKcAxEhQ9OLRc=
-github.com/open-crypto-broker/crypto-broker-client-go v0.5.1-0.20261117100841-4467fee7b93b/go.mod h1:0CLg+B9JlXC/ujpGcUwLmVurzGIzLzBPORx3dEu2LKs=
+github.com/open-crypto-broker/crypto-broker-client-go v0.5.1-0.20261126142203-54954ce3dcf7 h1:THbzyYOtlZTY0p4elpk23Vo/iS9J19Nsvg6RHemtu2E=
+github.com/open-crypto-broker/crypto-broker-client-go v0.5.1-0.20261126142203-54954ce3dcf7/go.mod h1:9JOPGMJvfpUkykXLaoQ7DVo69eW7vBxvpaWLfJzOl34=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/sony/gobreaker/v2 v2.4.0 h1:g2KJRW1Ubty3+ZOcSEUN7K+REQJdN6yo6XvaML+jptg=
 github.com/sony/gobreaker/v2 v2.4.0/go.mod h1:pTyFJgcZ3h2tdQVLZZruK2C0eoFL1fb/G83wK1ZQl+s=

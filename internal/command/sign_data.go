@@ -32,7 +32,7 @@ func NewSignData(ctx context.Context, lib *cryptobrokerclientgo.Library, logger 
 
 func (command *SignData) Run(ctx context.Context, data []byte, profile, keyPath, signatureFormat string, loop int) error {
 	defer func() { _ = command.gracefulShutdown() }()
-	key, err := readPEMKey(keyPath)
+	key, err := readKey(keyPath)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func (command *SignData) gracefulShutdown() error {
 	return command.cryptoBrokerLibrary.Close()
 }
 
-func readPEMKey(path string) ([]byte, error) {
+func readKey(path string) ([]byte, error) {
 	if path == "" {
 		return nil, fmt.Errorf("key is required")
 	}
